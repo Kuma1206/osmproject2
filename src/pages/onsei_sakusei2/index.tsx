@@ -7,7 +7,7 @@ import { FaMicrophone } from "react-icons/fa";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { app, saveVideoDataWithTransaction } from "@/firebase/client"; // トランザクション関数をインポート
+import { app } from "@/firebase/client"; // トランザクション関数をインポート
 import { FFmpeg } from "@ffmpeg/ffmpeg"; // 崩さないインポート
 import { fetchFile } from "@ffmpeg/util"; // 崩さないインポート
 

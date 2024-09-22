@@ -27,6 +27,7 @@ interface VideoData {
   createdAt: number;
   updatedAt?: number;
   thumbnailUrl?: string; // ここに thumbnailUrl プロパティを追加
+  isPublic?: boolean;
 }
 
 const Dougaichiran = () => {
@@ -104,6 +105,7 @@ const Dougaichiran = () => {
                   userId: auth.currentUser?.uid, // ユーザーIDを追加
                   videoUrl: video.videoUrl,
                   videoDocId: video.id, // videoDocIdをクエリパラメータとして追加
+                  isPublic: video.isPublic, // isPublic プロパティを追加
                 },
               }}
             >
