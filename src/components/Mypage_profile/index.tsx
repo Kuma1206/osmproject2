@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./style.module.scss";
+import IcBaselineAccountBox from "@/components/Profileimage";
 import { uploadProfileImage } from "../../firebase/client";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/client";
+import UserMenu2 from "../UserMenu2";
 import { useRouter } from "next/router";
 
 const Mypage_profile = () => {
@@ -21,11 +23,11 @@ const Mypage_profile = () => {
       }
     };
 
-    // ユーザーがログインしているか確認し、データを取得
+    // ユーザーがログインしているか確認
     if (auth.currentUser) {
-      fetchUserData(); // ログインしている場合、データを取得
+      router.push("/seisaku_page2"); // ログインしている場合、/mypage にリダイレクト
     } else {
-      router.push("/seisaku_page1"); // ログインしていない場合にリダイレクト
+      fetchUserData();
     }
   }, [router]);
 
@@ -67,26 +69,31 @@ const Mypage_profile = () => {
     <>
       <main className={styles.mainbox1}>
         <div className={styles.pbox}>
-          {/* プロフィール画像の表示 */}
-          {profileImage && (
+          {/* ユーザーがログインしていない場合のみpimageを表示 */}
+          {!auth.currentUser && (
             <p className={styles.pimage} onClick={handleClick}>
-              <Image
-                src={profileImage}
-                alt="Profile"
-                className={styles.pimagebox2}
-                width={100} // 必須の width
-                height={100} // 必須の height
-              />
+              {profileImage ? (
+                <Image
+                  src={profileImage}
+                  alt="Profile"
+                  className={styles.pimagebox2}
+                  width={100} // 必須の width
+                  height={100} // 必須の height
+                />
+              ) : (
+                <IcBaselineAccountBox className={styles.pimagebox} />
+              )}
             </p>
           )}
-
-          {/* ユーザー名の表示 */}
+          <div className={styles.iconbox}>
+            {auth.currentUser && <UserMenu2 onClick={handleClick} />}
+          </div>
+          {/* ユーザーがログインしている場合のみptextを表示 */}
           {auth.currentUser && (
             <div className={styles.psheet}>
               <p className={styles.ptext}>NAME</p>
             </div>
           )}
-
           <input
             type="file"
             accept="image/*"
