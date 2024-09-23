@@ -76,12 +76,12 @@ const Onsei_sakusei2 = () => {
           }
           console.log("録音データ:", audioBlob);
         } else {
-          console.error("録音データが空です");
+          console.error("録音データが空です。");
         }
       };
 
       mediaRecorder.start();
-      console.log("録音を開始しました");
+      console.log("録音を開始しました。");
       setIsRecording(true);
 
       if (videoRef.current) {
