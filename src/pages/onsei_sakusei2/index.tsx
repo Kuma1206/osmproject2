@@ -41,11 +41,26 @@ const Onsei_sakusei2 = () => {
     }
   }, []);
 
+  const getSupportedMimeType = () => {
+    const possibleTypes = [
+      "audio/webm",
+      "audio/ogg",
+      "audio/mp4",
+      "audio/mpeg",
+    ];
+    return (
+      possibleTypes.find((type) => MediaRecorder.isTypeSupported(type)) || ""
+    );
+  };
+
   const startRecording = (stream: MediaStream) => {
     try {
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm", // 必要に応じて変更
-      });
+      const mimeType = getSupportedMimeType();
+      if (!mimeType) {
+        throw new Error("サポートされているMIMEタイプが見つかりません");
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -56,9 +71,7 @@ const Onsei_sakusei2 = () => {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm", // 必要に応じて変更
-        });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const audioUrl = URL.createObjectURL(audioBlob);
         if (audioRef.current) {
           audioRef.current.src = audioUrl;
