@@ -41,20 +41,10 @@ const Onsei_sakusei2 = () => {
     }
   }, []);
 
-  const startRecording = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert("録音を開始するにはログインが必要です。");
-      return;
-    }
-
+  const startRecording = (stream: MediaStream) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
-
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
+        mimeType: "audio/webm", // 必要に応じて変更
       });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -66,44 +56,54 @@ const Onsei_sakusei2 = () => {
       };
 
       mediaRecorder.onstop = () => {
-        if (audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: "audio/webm",
-          });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          if (audioRef.current) {
-            audioRef.current.src = audioUrl;
-          }
-          console.log("録音データ:", audioBlob);
-        } else {
-          console.error("録音データが空です。");
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/webm", // 必要に応じて変更
+        });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
         }
+        alert("録音が終了しました。");
+      };
+
+      mediaRecorder.onerror = (event: Event) => {
+        const error = event as ErrorEvent;
+        alert("MediaRecorderエラー: " + error.message);
       };
 
       mediaRecorder.start();
-      console.log("録音を開始しました。");
+      alert("録音を開始しました。");
       setIsRecording(true);
 
       if (videoRef.current) {
         videoRef.current.play();
+        videoRef.current.onended = () => {
+          stopRecording();
+        };
       }
     } catch (err) {
-      console.error("マイクアクセスエラー:", err);
+      if (err instanceof Error) {
+        alert("録音の開始中にエラーが発生しました: " + err.message);
+      } else {
+        alert("録音の開始中に未知のエラーが発生しました。");
+      }
     }
   };
 
   const stopRecording = () => {
+    // 録音を停止
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
       mediaRecorderRef.current.stop();
-      console.log("録音を停止しました");
+      console.log("録音を停止しました。");
     }
 
+    // 動画も停止
     if (videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      videoRef.current.currentTime = 0; // 動画の位置をリセット
     }
 
     setIsRecording(false);
@@ -276,6 +276,41 @@ const Onsei_sakusei2 = () => {
     }
   };
 
+  const checkMicrophonePermission = async () => {
+    // まず、ブラウザがgetUserMediaをサポートしているかを確認
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("お使いのブラウザはマイクへのアクセスをサポートしていません。");
+      return null; // ブラウザがサポートしていない場合はnullを返す
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      alert("マイクのアクセスが許可されました");
+      return stream; // 権限が許可されている場合、streamを返す
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(
+          "マイクのアクセスが拒否されました、またはエラーが発生しました: " +
+            err.message
+        );
+      } else {
+        alert(
+          "マイクのアクセスが拒否されました、または未知のエラーが発生しました。"
+        );
+      }
+      return null; // 権限が拒否された場合やエラーが発生した場合
+    }
+  };
+
+  const startRecordingWithPermissionCheck = async () => {
+    const stream = await checkMicrophonePermission();
+    if (stream) {
+      startRecording(stream); // 権限が許可されたら録音を開始
+    } else {
+      alert("マイクの権限が許可されていません。録音を開始できません。");
+    }
+  };
+
   return (
     <>
       <div className={styles.moviebox}>
@@ -300,11 +335,15 @@ const Onsei_sakusei2 = () => {
 
       <div
         className={styles.microphoneIconContainer}
-        onClick={() => {
+        onClick={async () => {
           if (isRecording) {
-            stopRecording();
+            stopRecording(); // 録音と動画を停止
           } else {
-            startRecording();
+            // 録音を開始する前にマイク権限を確認
+            const stream = await checkMicrophonePermission();
+            if (stream) {
+              startRecording(stream); // 権限が許可されたら録音と動画を開始
+            }
           }
         }}
       >
