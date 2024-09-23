@@ -96,7 +96,7 @@ const Onsei_sakusei2 = () => {
       }
     } catch (err) {
       if (err instanceof Error) {
-        alert("録音の開始中にエラーが発生しました: " + err.message);
+        alert("録音の開始中にエラーが発生しました。: " + err.message);
       } else {
         alert("録音の開始中に未知のエラーが発生しました。");
       }
