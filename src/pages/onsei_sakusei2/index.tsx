@@ -349,6 +349,12 @@ const Onsei_sakusei2 = () => {
       <div
         className={styles.microphoneIconContainer}
         onClick={async () => {
+          const user = auth.currentUser;
+          if (!user) {
+            alert("ログインしてください。");
+            return;
+          }
+
           if (isRecording) {
             stopRecording(); // 録音と動画を停止
           } else {
