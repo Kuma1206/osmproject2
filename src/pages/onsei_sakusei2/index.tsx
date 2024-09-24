@@ -62,9 +62,11 @@ const Onsei_sakusei2 = () => {
 
         // エラーの詳細をアラートで表示
         if (error instanceof Error) {
-          alert(`FFmpegのロードに失敗しました。エラー内容: ${error.message}`);
+          alert(
+            `FFmpegのロードに失敗しました。\n\nエラー内容: ${error.message}\n\nスタックトレース:\n${error.stack}`
+          );
         } else if (typeof error === "string") {
-          alert(`FFmpegのロードに失敗しました。エラー内容: ${error}`);
+          alert(`FFmpegのロードに失敗しました。\n\nエラー内容: ${error}`);
         } else {
           alert("FFmpegのロードに失敗しました。不明なエラーが発生しました。");
         }
@@ -87,17 +89,29 @@ const Onsei_sakusei2 = () => {
           return false;
         }
       } catch (e) {
-        console.log(
-          "WebAssemblyのサポート状況チェック中にエラーが発生しました:",
-          e
-        );
-        alert("WebAssemblyのサポート状況チェック中にエラーが発生しました。");
+        if (e instanceof Error) {
+          console.log(
+            "WebAssemblyのサポート状況チェック中にエラーが発生しました:",
+            e
+          );
+          alert(
+            `WebAssemblyのサポート状況チェック中にエラーが発生しました: ${e.message}\n\nスタックトレース:\n${e.stack}`
+          );
+        } else {
+          console.log(
+            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました:",
+            e
+          );
+          alert(
+            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました"
+          );
+        }
         return false;
       }
     };
 
     if (isWebAssemblySupported()) {
-      loadFFmpeg(); // 'loadFFmpeg' がここで呼ばれています
+      loadFFmpeg(); // FFmpegのロードを実行
     }
   }, []);
 
