@@ -7,9 +7,9 @@ import { FaMicrophone } from "react-icons/fa";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { app } from "@/firebase/client"; // トランザクション関数をインポート
-import { FFmpeg } from "@ffmpeg/ffmpeg"; // 崩さないインポート
-import { fetchFile } from "@ffmpeg/util"; // 崩さないインポート
+import { app } from "@/firebase/client";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 
 const auth = getAuth(app);
 const storage = getStorage(app);
@@ -22,55 +22,51 @@ const Onsei_sakusei2 = () => {
   const [isSaving, setIsSaving] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [ffmpeg, setFFmpeg] = useState<any>(null); // FFmpegインスタンスを状態として管理
-  const [ffmpegLoaded, setFfmpegLoaded] = useState(false); // FFmpegがロード済みかを管理
+  const [ffmpeg, setFFmpeg] = useState<any>(null);
+  const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
 
-  // useEffectでクライアントサイドのみffmpeg.wasmをロード
   useEffect(() => {
     const loadFFmpeg = async () => {
       try {
-        // FFmpegインスタンスを作成
         const ffmpegInstance = new FFmpeg();
 
         ffmpegInstance.on("log", ({ type, message }) => {
           console.log(`[FFmpeg ${type}] ${message}`);
         });
 
-        alert("FFmpegのロードを開始します");
+        console.log("FFmpegのロードを開始します");
 
-        // FFmpegをロードし、coreURLとwasmURL、workerURLを設定
         await ffmpegInstance.load({
-          coreURL: "/ffmpeg/ffmpeg-core.js", // publicフォルダ内のffmpeg-core.jsを参照
-          wasmURL: "/ffmpeg/ffmpeg-core.wasm", // publicフォルダ内のffmpeg-core.wasmを参照
-          workerURL: "/ffmpeg/ffmpeg-core.worker.js", // publicフォルダ内のworker.jsを参照
-        });
+          coreURL: "/ffmpeg/ffmpeg-core.js",
+          wasmURL: "/ffmpeg/ffmpeg-core.wasm",
+          workerURL: "/ffmpeg/ffmpeg-core.worker.js",
+          mainName: "main",
+          coreName: "ffmpeg-core",
+          memoryInitializerPrefixURL: "/ffmpeg/",
+          memoryInitializer: "ffmpeg-core.mem",
+          memoryInitializerRequest: {
+            mode: "no-cors",
+          },
+          memoryGrowthStep: 64 * 1024 * 1024,
+          memoryMaxGrowth: 128 * 1024 * 1024,
+        } as any);
 
-        setFFmpeg(ffmpegInstance); // FFmpegインスタンスを保存
-        setFfmpegLoaded(true); // FFmpegがロードされたことを示すフラグをセット
-        alert("FFmpegが正常にロードされました");
+        setFFmpeg(ffmpegInstance);
+        setFfmpegLoaded(true);
+        console.log("FFmpegが正常にロードされました");
       } catch (error) {
         console.error("FFmpegロードエラー:", error);
-
-        if (error instanceof Error) {
-          alert(
-            "FFmpegのロードに失敗しました: " +
-              error.message +
-              "\n" +
-              error.stack
-          );
-        } else {
-          alert(
-            "FFmpegのロードに失敗しました: 不明なエラーが発生しました\n詳細: " +
-              JSON.stringify(error)
-          );
-        }
+        alert(
+          "FFmpegのロードに失敗しました。詳細はコンソールを確認してください。"
+        );
       }
     };
 
     if (typeof window !== "undefined") {
-      loadFFmpeg(); // クライアントサイドでのみFFmpegをロード
+      loadFFmpeg();
     }
   }, []);
 
@@ -109,7 +105,7 @@ const Onsei_sakusei2 = () => {
         if (audioRef.current) {
           audioRef.current.src = audioUrl;
         }
-        alert("録音が終了しました。");
+        console.log("録音が終了しました。");
       };
 
       mediaRecorder.onerror = (event: Event) => {
@@ -118,7 +114,7 @@ const Onsei_sakusei2 = () => {
       };
 
       mediaRecorder.start();
-      alert("録音を開始しました。");
+      console.log("録音を開始しました。");
       setIsRecording(true);
 
       if (videoRef.current) {
@@ -137,7 +133,6 @@ const Onsei_sakusei2 = () => {
   };
 
   const stopRecording = () => {
-    // 録音を停止
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
@@ -146,16 +141,14 @@ const Onsei_sakusei2 = () => {
       console.log("録音を停止しました。");
     }
 
-    // 動画も停止
     if (videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.currentTime = 0; // 動画の位置をリセット
+      videoRef.current.currentTime = 0;
     }
 
     setIsRecording(false);
   };
 
-  // サムネイルをキャプチャする関数
   const captureThumbnail = async () => {
     if (!videoRef.current) {
       alert("動画が見つかりません");
@@ -170,13 +163,13 @@ const Onsei_sakusei2 = () => {
 
       const ctx = canvas.getContext("2d");
 
-      videoElement.currentTime = 1; // 動画の1秒後にフレームをキャプチャ
+      videoElement.currentTime = 1;
 
       const handleSeeked = () => {
         if (ctx) {
           ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
           const dataURL = canvas.toDataURL("image/png");
-          alert("サムネイルキャプチャ成功");
+          console.log("サムネイルキャプチャ成功");
           resolve(dataURL);
         } else {
           alert("Canvasのコンテキストが取得できませんでした");
@@ -194,7 +187,6 @@ const Onsei_sakusei2 = () => {
     });
   };
 
-  // サムネイルをFirebaseにアップロードする関数
   const uploadThumbnailToFirebase = async (thumbnailDataUrl: string) => {
     const user = auth.currentUser;
     if (!user) return null;
@@ -208,17 +200,16 @@ const Onsei_sakusei2 = () => {
     const response = await fetch(thumbnailDataUrl);
     const blob = await response.blob();
     const snapshot = await uploadBytes(thumbnailStorageRef, blob);
-    return getDownloadURL(snapshot.ref); // サムネイルのURLを返す
+    return getDownloadURL(snapshot.ref);
   };
 
-  // 動画と音声を結合する関数
   const mergeAudioVideo = async (audioBlob: Blob, videoUrl: string) => {
     if (!ffmpegLoaded) {
       alert("FFmpegがロードされていません");
       return null;
     }
 
-    alert("FFmpegを使って音声と動画を結合中");
+    console.log("FFmpegを使って音声と動画を結合中");
 
     const audioFile = "audio.webm";
     const videoFile = "video.mp4";
@@ -228,13 +219,13 @@ const Onsei_sakusei2 = () => {
       const videoResponse = await fetch(videoUrl);
       const videoBlob = await videoResponse.blob();
 
-      alert("動画ファイルをFFmpegに書き込み中");
+      console.log("動画ファイルをFFmpegに書き込み中");
       await ffmpeg.writeFile(videoFile, await fetchFile(videoBlob));
 
-      alert("音声ファイルをFFmpegに書き込み中");
+      console.log("音声ファイルをFFmpegに書き込み中");
       await ffmpeg.writeFile(audioFile, await fetchFile(audioBlob));
 
-      alert("音声と動画を結合開始");
+      console.log("音声と動画を結合開始");
       await ffmpeg.exec([
         "-i",
         videoFile,
@@ -252,7 +243,7 @@ const Onsei_sakusei2 = () => {
       const data = await ffmpeg.readFile(outputFile);
       const mergedBlob = new Blob([data], { type: "video/mp4" });
 
-      alert("音声と動画の結合が完了しました");
+      console.log("音声と動画の結合が完了しました");
 
       return mergedBlob;
     } catch (error) {
@@ -265,8 +256,6 @@ const Onsei_sakusei2 = () => {
     }
   };
 
-  // 動画とサムネイルをFirebaseに保存し、トランザクションでFireStoreに保存
-  // 動画とサムネイルをFirebaseに保存し、Firestoreに保存する関数
   const saveMergedVideoToFirebase = async (
     mergedBlob: Blob,
     thumbnailUrl: string
@@ -285,18 +274,16 @@ const Onsei_sakusei2 = () => {
         `user_videos/${user.uid}/${mergedVideoFileName}`
       );
 
-      // 動画ファイルをFirebase Storageにアップロード
       const snapshot = await uploadBytes(mergedVideoRef, mergedBlob);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
-      // Firestoreのvideosコレクションに動画データを保存
       const videoCollectionRef = doc(firestore, "videos", mergedVideoFileName);
 
       await setDoc(videoCollectionRef, {
         userId: user.uid,
-        videoUrl: downloadURL, // 動画のURL
-        thumbnailUrl: thumbnailUrl, // サムネイルのURL
-        isPublic: true, // デフォルトで公開状態
+        videoUrl: downloadURL,
+        thumbnailUrl: thumbnailUrl,
+        isPublic: true,
         createdAt: Date.now(),
         status: "ready",
       });
@@ -320,27 +307,27 @@ const Onsei_sakusei2 = () => {
       return;
     }
 
-    alert("サムネイルをキャプチャ開始");
+    console.log("サムネイルをキャプチャ開始");
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
     try {
       const thumbnailDataUrl = await captureThumbnail();
-      alert("サムネイルをキャプチャ完了");
+      console.log("サムネイルをキャプチャ完了");
 
       const thumbnailUrl = await uploadThumbnailToFirebase(
         thumbnailDataUrl || ""
       );
-      alert("サムネイルのFirebaseアップロード完了");
+      console.log("サムネイルのFirebaseアップロード完了");
 
-      alert("音声と動画の結合開始");
+      console.log("音声と動画の結合開始");
       const mergedBlob = await mergeAudioVideo(audioBlob, videoUrl as string);
-      alert("音声と動画の結合完了");
+      console.log("音声と動画の結合完了");
 
       if (mergedBlob !== null && thumbnailUrl !== null) {
-        alert("結合された動画をFirebaseに保存開始");
+        console.log("結合された動画をFirebaseに保存開始");
         await saveMergedVideoToFirebase(mergedBlob, thumbnailUrl);
-        alert("結合された動画をFirebaseに保存完了");
+        console.log("結合された動画をFirebaseに保存完了");
       } else {
         alert("動画の結合またはサムネイルの取得に失敗しました。");
       }
@@ -361,16 +348,15 @@ const Onsei_sakusei2 = () => {
   };
 
   const checkMicrophonePermission = async () => {
-    // まず、ブラウザがgetUserMediaをサポートしているかを確認
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert("お使いのブラウザはマイクへのアクセスをサポートしていません。");
-      return null; // ブラウザがサポートしていない場合はnullを返す
+      return null;
     }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      alert("マイクのアクセスが許可されました");
-      return stream; // 権限が許可されている場合、streamを返す
+      console.log("マイクのアクセスが許可されました");
+      return stream;
     } catch (err) {
       if (err instanceof Error) {
         alert(
@@ -382,14 +368,14 @@ const Onsei_sakusei2 = () => {
           "マイクのアクセスが拒否されました、または未知のエラーが発生しました。"
         );
       }
-      return null; // 権限が拒否された場合やエラーが発生した場合
+      return null;
     }
   };
 
   const startRecordingWithPermissionCheck = async () => {
     const stream = await checkMicrophonePermission();
     if (stream) {
-      startRecording(stream); // 権限が許可されたら録音を開始
+      startRecording(stream);
     } else {
       alert("マイクの権限が許可されていません。録音を開始できません。");
     }
@@ -406,6 +392,7 @@ const Onsei_sakusei2 = () => {
             controlsList="nodownload"
             crossOrigin="anonymous"
             onEnded={stopRecording}
+            poster={thumbnailUrl ? (thumbnailUrl as string) : ""}
           >
             <source src={videoUrl as string} type="video/mp4" />
             お使いのブラウザは動画タグをサポートしていません。
@@ -427,12 +414,11 @@ const Onsei_sakusei2 = () => {
           }
 
           if (isRecording) {
-            stopRecording(); // 録音と動画を停止
+            stopRecording();
           } else {
-            // 録音を開始する前にマイク権限を確認
             const stream = await checkMicrophonePermission();
             if (stream) {
-              startRecording(stream); // 権限が許可されたら録音と動画を開始
+              startRecording(stream);
             }
           }
         }}
