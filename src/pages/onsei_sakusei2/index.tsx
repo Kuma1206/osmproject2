@@ -59,9 +59,15 @@ const Onsei_sakusei2 = () => {
         console.log("FFmpegが正常にロードされました");
       } catch (error) {
         console.error("FFmpegロードエラー:", error);
-        alert(
-          "FFmpegのロードに失敗しました。詳細はコンソールを確認してください。"
-        );
+
+        // エラーの詳細をアラートで表示
+        if (error instanceof Error) {
+          alert(`FFmpegのロードに失敗しました。エラー内容: ${error.message}`);
+        } else if (typeof error === "string") {
+          alert(`FFmpegのロードに失敗しました。エラー内容: ${error}`);
+        } else {
+          alert("FFmpegのロードに失敗しました。不明なエラーが発生しました。");
+        }
       }
     };
 
