@@ -71,8 +71,33 @@ const Onsei_sakusei2 = () => {
       }
     };
 
-    if (typeof window !== "undefined") {
-      loadFFmpeg();
+    const isWebAssemblySupported = () => {
+      try {
+        if (
+          typeof WebAssembly === "object" &&
+          typeof WebAssembly.instantiate === "function"
+        ) {
+          console.log("WebAssemblyはサポートされています。");
+          return true;
+        } else {
+          console.log("WebAssemblyはサポートされていません。");
+          alert(
+            "お使いのブラウザはWebAssemblyをサポートしていません。最新のブラウザを使用してください。"
+          );
+          return false;
+        }
+      } catch (e) {
+        console.log(
+          "WebAssemblyのサポート状況チェック中にエラーが発生しました:",
+          e
+        );
+        alert("WebAssemblyのサポート状況チェック中にエラーが発生しました。");
+        return false;
+      }
+    };
+
+    if (isWebAssemblySupported()) {
+      loadFFmpeg(); // 'loadFFmpeg' がここで呼ばれています
     }
   }, []);
 
