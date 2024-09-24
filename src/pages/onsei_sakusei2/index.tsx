@@ -33,8 +33,13 @@ const Onsei_sakusei2 = () => {
       try {
         const ffmpegInstance = new FFmpeg();
 
+        // FFmpegのログを全てキャッチする
         ffmpegInstance.on("log", ({ type, message }) => {
           console.log(`[FFmpeg ${type}] ${message}`);
+          // エラータイプが含まれていたら表示
+          if (type === "error" || message.toLowerCase().includes("error")) {
+            alert(`FFmpegエラー: ${message}`);
+          }
         });
 
         console.log("FFmpegのロードを開始します");
