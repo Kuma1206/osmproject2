@@ -37,7 +37,7 @@ export const updateIsPublic = async (docPath: string, isPublic: boolean) => {
     });
     console.log('isPublicフィールドが正常に保存されました。');
   } catch (error) {
-    console.error('isPublicの保存中にエラーが発生しました:', error);
+    console.error('isPublicの保存中にエラーが発生しました。:', error);
   }
 };
 
