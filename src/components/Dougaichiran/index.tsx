@@ -8,6 +8,7 @@ import {
   doc,
   updateDoc,
   deleteField,
+  Unsubscribe,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/firebase/client"; // Firebase初期化コード
@@ -34,38 +35,40 @@ const Dougaichiran = () => {
   const [videoList, setVideoList] = useState<VideoData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
     const fetchVideos = async (userId: string) => {
-      // videosコレクションから現在のユーザーに紐づいた動画を取得
       const videoCollectionRef = collection(firestore, "videos");
-
-      // userIdに基づいて動画をフィルタリング
       const q = query(videoCollectionRef, where("userId", "==", userId));
 
       // Firestoreのvideosコレクションからデータを取得
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+      const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
         const videoData = snapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
-          .filter((data) => data.videoUrl); // videoUrl が存在するデータのみ取得
+          .filter((data) => data.videoUrl);
 
         setVideoList(videoData);
         setLoading(false);
       });
 
-      return () => unsubscribe();
+      return unsubscribeSnapshot;
     };
 
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        fetchVideos(user.uid); // 現在のユーザーIDを使って動画を取得
+        console.log("User logged in: ", user.uid);
+        fetchVideos(user.uid); // ユーザーがログインしている時のみデータを取得
       } else {
+        console.log("No user logged in");
         setVideoList([]);
         setLoading(false);
       }
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      console.log("Dougaichiran component unmounted.");
+      if (unsubscribeAuth) unsubscribeAuth();
+    };
+  }, []); // 空の依存配列により、初回マウント時にのみ実行される
 
   const handleDelete = async (videoId: string) => {
     if (window.confirm("削除しますか？")) {

@@ -31,19 +31,22 @@ const Footer = () => {
         <Link href={"/seisaku_page2"}>
           <PlusIcon
             className={
-              clickedIcon === "olus" ? styles.iconClicked : styles.icon
+              clickedIcon === "plus" ? styles.iconClicked : styles.icon
             }
             onClick={() => handleIconClick("plus")}
           />
         </Link>
       </li>
       <li>
-        <Link href={"/seisaku_page1"}>
+        <Link href="/seisaku_page1">
           <UserIcon
             className={
               clickedIcon === "user" ? styles.iconClicked : styles.icon
             }
-            onClick={() => handleIconClick("user")}
+            onClick={() => {
+              handleIconClick("user");
+              console.log("Navigating to /seisaku_page1"); // ログを追加
+            }}
           />
         </Link>
       </li>

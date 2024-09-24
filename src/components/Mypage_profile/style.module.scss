@@ -98,7 +98,7 @@
 .psheet {
   position: relative;
   padding-top: 10px;
-  left: 30px;
+  left: 100px;
   top: 20px;
   display: flex;
   flex-direction: column;
@@ -108,4 +108,8 @@
   position: relative;
   top: 20px;
   left: 30px;
+}
+
+.profilebox {
+  display: flex
 }

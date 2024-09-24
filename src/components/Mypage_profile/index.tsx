@@ -7,45 +7,38 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/client";
 import UserMenu2 from "../UserMenu2";
 import { useRouter } from "next/router";
+import { onAuthStateChanged } from "firebase/auth"; // 追加
 
 const Mypage_profile = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const router = useRouter(); // useRouter フックを使ってルーターを取得
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userId = auth.currentUser?.uid;
-      if (userId) {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userId = user.uid;
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
           setProfileImage(userDoc.data().photoURL || null);
         }
+      } else {
+        router.push("/seisaku_page2"); // ログインしていない場合にリダイレクト
       }
-    };
+    });
 
-    // ユーザーがログインしているか確認
-    if (auth.currentUser) {
-      router.push("/seisaku_page2"); // ログインしている場合、/mypage にリダイレクト
-    } else {
-      fetchUserData();
-    }
+    return () => unsubscribe(); // クリーンアップ処理
   }, [router]);
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    console.log("選択されたファイル:", file);
-
     if (file) {
       try {
-        console.log("アップロードを開始します:", file.name);
         const imageUrl = await uploadProfileImage(file);
-        console.log("画像のアップロードに成功:", imageUrl);
         setProfileImage(imageUrl);
 
         const userId = auth.currentUser?.uid;
-
         if (userId) {
           await setDoc(
             doc(db, "users", userId),
@@ -56,8 +49,6 @@ const Mypage_profile = () => {
       } catch (error) {
         console.error("画像のアップロードに失敗しました:", error);
       }
-    } else {
-      console.log("ファイルが選択されていません。");
     }
   };
 
@@ -66,44 +57,42 @@ const Mypage_profile = () => {
   };
 
   return (
-    <>
-      <main className={styles.mainbox1}>
-        <div className={styles.pbox}>
-          {/* ユーザーがログインしていない場合のみpimageを表示 */}
-          {!auth.currentUser && (
-            <p className={styles.pimage} onClick={handleClick}>
-              {profileImage ? (
-                <Image
-                  src={profileImage}
-                  alt="Profile"
-                  className={styles.pimagebox2}
-                  width={100} // 必須の width
-                  height={100} // 必須の height
-                />
-              ) : (
-                <IcBaselineAccountBox className={styles.pimagebox} />
-              )}
-            </p>
-          )}
-          <div className={styles.iconbox}>
-            {auth.currentUser && <UserMenu2 onClick={handleClick} />}
-          </div>
-          {/* ユーザーがログインしている場合のみptextを表示 */}
-          {auth.currentUser && (
+    <main className={styles.mainbox1}>
+      <div className={styles.pbox}>
+        {/* ログイン状態に応じて表示 */}
+        {auth.currentUser ? (
+          <div className={styles.profilebox}>
+            <div className={styles.iconbox}>
+              <UserMenu2 onClick={handleClick} />
+            </div>
             <div className={styles.psheet}>
               <p className={styles.ptext}>NAME</p>
             </div>
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            id="fileInput"
-            style={{ display: "none" }}
-            onChange={handleImageUpload}
-          />
-        </div>
-      </main>
-    </>
+          </div>
+        ) : (
+          <p className={styles.pimage} onClick={handleClick}>
+            {profileImage ? (
+              <Image
+                src={profileImage}
+                alt="Profile"
+                className={styles.pimagebox2}
+                width={100}
+                height={100}
+              />
+            ) : (
+              <IcBaselineAccountBox className={styles.pimagebox} />
+            )}
+          </p>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          id="fileInput"
+          style={{ display: "none" }}
+          onChange={handleImageUpload}
+        />
+      </div>
+    </main>
   );
 };
 
