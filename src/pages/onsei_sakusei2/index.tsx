@@ -42,9 +42,9 @@ const Onsei_sakusei2 = () => {
 
         // FFmpegをロードし、coreURLとwasmURL、workerURLを設定
         await ffmpegInstance.load({
-          coreURL: "/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js",
-          wasmURL: "/node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm",
-          workerURL: "/node_modules/@ffmpeg/core/dist/ffmpeg-core.worker.js",
+          coreURL: "/ffmpeg/ffmpeg-core.js", // publicフォルダ内のffmpeg-core.jsを参照
+          wasmURL: "/ffmpeg/ffmpeg-core.wasm", // publicフォルダ内のffmpeg-core.wasmを参照
+          workerURL: "/ffmpeg/ffmpeg-core.worker.js", // publicフォルダ内のworker.jsを参照
         });
 
         setFFmpeg(ffmpegInstance); // FFmpegインスタンスを保存
