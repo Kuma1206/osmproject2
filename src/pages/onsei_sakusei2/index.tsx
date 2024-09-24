@@ -30,10 +30,20 @@ const Onsei_sakusei2 = () => {
   // useEffectでクライアントサイドのみffmpeg.wasmをロード
   useEffect(() => {
     const loadFFmpeg = async () => {
-      const ffmpegInstance = new FFmpeg();
-      await ffmpegInstance.load();
-      setFFmpeg(ffmpegInstance);
-      setFfmpegLoaded(true);
+      try {
+        const ffmpegInstance = new FFmpeg();
+        alert("FFmpegのロードを開始します");
+        await ffmpegInstance.load();
+        setFFmpeg(ffmpegInstance);
+        setFfmpegLoaded(true);
+        alert("FFmpegが正常にロードされました");
+      } catch (error) {
+        if (error instanceof Error) {
+          alert("FFmpegのロードに失敗しました: " + error.message);
+        } else {
+          alert("FFmpegのロードに失敗しました: 不明なエラーが発生しました");
+        }
+      }
     };
 
     if (typeof window !== "undefined") {
@@ -137,22 +147,27 @@ const Onsei_sakusei2 = () => {
 
       const ctx = canvas.getContext("2d");
 
-      if (!ctx) {
-        alert("Canvas context が取得できませんでした");
-        reject("Canvas context not available");
-        return;
-      }
-
       videoElement.currentTime = 1; // 動画の1秒後にフレームをキャプチャ
 
       const handleSeeked = () => {
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL("image/png");
-        resolve(dataURL);
+        if (ctx) {
+          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+          const dataURL = canvas.toDataURL("image/png");
+          alert("サムネイルキャプチャ成功");
+          resolve(dataURL);
+        } else {
+          alert("Canvasのコンテキストが取得できませんでした");
+          reject("Canvas context not available");
+        }
         videoElement.removeEventListener("seeked", handleSeeked);
       };
 
       videoElement.addEventListener("seeked", handleSeeked);
+
+      videoElement.onerror = () => {
+        alert("サムネイルのキャプチャ中にエラーが発生しました");
+        reject("サムネイルキャプチャに失敗");
+      };
     });
   };
 
@@ -190,9 +205,13 @@ const Onsei_sakusei2 = () => {
       const videoResponse = await fetch(videoUrl);
       const videoBlob = await videoResponse.blob();
 
+      alert("動画ファイルをFFmpegに書き込み中");
       await ffmpeg.writeFile(videoFile, await fetchFile(videoBlob));
+
+      alert("音声ファイルをFFmpegに書き込み中");
       await ffmpeg.writeFile(audioFile, await fetchFile(audioBlob));
 
+      alert("音声と動画を結合開始");
       await ffmpeg.exec([
         "-i",
         videoFile,
