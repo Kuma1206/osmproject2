@@ -80,12 +80,23 @@ const Onsei_sakusei2 = () => {
         }
       };
 
+      // 動画の再生終了時に録音も停止する
+      if (videoRef.current) {
+        videoRef.current.addEventListener("ended", stopRecording);
+      }
+
       mediaRecorder.start();
       console.log("録音を開始しました");
       setIsRecording(true);
 
+      // 録音開始と同時に動画を再生
       if (videoRef.current) {
-        videoRef.current.play();
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("動画の再生に失敗しました:", error);
+          });
+        }
       }
     } catch (err) {
       console.error("マイクアクセスエラー:", err);
