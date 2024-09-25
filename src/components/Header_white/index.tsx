@@ -27,7 +27,7 @@ const Header_whtie = () => {
         <li className={styles.logo}>logo</li>
       </Link>
       <div className={styles.login}>
-        {user === null && !waiting && <p onClick={signIn}>ログイン</p>}
+        {user === null && !waiting && <p onClick={signIn}>login</p>}
       </div>
       <div className={styles.icon}>{user && <UserMenu />} </div>
     </ul>

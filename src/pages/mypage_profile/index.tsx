@@ -44,6 +44,7 @@ const MypageProfile = ({ params }: { params: Params }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // ユーザーがログインしている場合、プロフィールデータを取得
         const userId = user.uid;
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
@@ -60,11 +61,12 @@ const MypageProfile = ({ params }: { params: Params }) => {
           setProfileImage(userData.photoURL || null);
         }
       } else {
-        router.push("/login"); // ログインしていない場合のリダイレクト
+        // ログインしていない場合はデフォルト状態を表示するだけに変更
+        console.log("ユーザーがログインしていません");
       }
     });
 
-    return () => unsubscribe(); // クリーンアップ処理
+    return () => unsubscribe();
   }, [router]);
 
   // プロフィール画像のアップロード処理
@@ -123,6 +125,16 @@ const MypageProfile = ({ params }: { params: Params }) => {
     }
   };
 
+  const handleEditProfileClick = () => {
+    if (!auth.currentUser) {
+      // ユーザーがログインしていない場合はアラートを表示
+      alert("ログインしてください");
+    } else {
+      // ログインしている場合はプロフィール編集モーダルを開く
+      setIsEditProfileOpen(true);
+    }
+  };
+
   return (
     <>
       <Header_whtie />
@@ -142,7 +154,7 @@ const MypageProfile = ({ params }: { params: Params }) => {
               リンク: <a href={currentUser.link}>{currentUser.link}</a>
             </p>
             <button
-              onClick={() => setIsEditProfileOpen(true)}
+              onClick={() => handleEditProfileClick()}
               className={styles.profileButton}
             >
               <BsPencil />

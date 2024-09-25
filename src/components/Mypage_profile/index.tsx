@@ -6,29 +6,30 @@ import { uploadProfileImage } from "../../firebase/client";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/client";
 import UserMenu2 from "../UserMenu2";
-import { useRouter } from "next/router";
 import { onAuthStateChanged } from "firebase/auth"; // 追加
-import { headers } from "next/headers";
 
 const Mypage_profile = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // ログイン状態を管理
+  const [loading, setLoading] = useState(true); // 認証チェック中のローディング状態を管理
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setIsLoggedIn(true); // ログインしている場合
         const userId = user.uid;
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
           setProfileImage(userDoc.data().photoURL || null);
         }
       } else {
-        router.push("/seisaku_page2"); // ログインしていない場合にリダイレクト
+        setIsLoggedIn(false); // ログインしていない場合
       }
+      setLoading(false); // 認証チェック終了
     });
 
     return () => unsubscribe(); // クリーンアップ処理
-  }, [router]);
+  }, []);
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -54,37 +55,43 @@ const Mypage_profile = () => {
   };
 
   const handleClick = () => {
-    document.getElementById("fileInput")?.click();
+    if (!isLoggedIn) {
+      alert("ログインしてください"); // ログインしていない場合のアラート
+    } else {
+      document.getElementById("fileInput")?.click(); // ログインしている場合にのみ編集を許可
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // 認証チェック中はローディング表示
+  }
 
   return (
     <main className={styles.mainbox1}>
       <div className={styles.pbox}>
-        {/* ログイン状態に応じて表示 */}
-        {auth.currentUser ? (
-          <div className={styles.profilebox}>
-            <div className={styles.iconbox}>
-              <UserMenu2 onClick={handleClick} />
-            </div>
-            <div className={styles.psheet}>
-              <p className={styles.ptext}>NAME</p>
-            </div>
+        <div className={styles.profilebox}>
+          <div className={styles.iconbox}>
+            <UserMenu2 onClick={handleClick} />
           </div>
-        ) : (
-          <p className={styles.pimage} onClick={handleClick}>
-            {profileImage ? (
-              <Image
-                src={profileImage}
-                alt="Profile"
-                className={styles.pimagebox2}
-                width={100}
-                height={100}
-              />
-            ) : (
-              <IcBaselineAccountBox className={styles.pimagebox} />
-            )}
-          </p>
-        )}
+          <div className={styles.psheet}>
+            <p className={styles.ptext}>NAME</p>
+          </div>
+        </div>
+
+        <p className={styles.pimage} onClick={handleClick}>
+          {profileImage ? (
+            <Image
+              src={profileImage}
+              alt="Profile"
+              className={styles.pimagebox2}
+              width={100}
+              height={100}
+            />
+          ) : (
+            <IcBaselineAccountBox className={styles.pimagebox} />
+          )}
+        </p>
+
         <input
           type="file"
           accept="image/*"
