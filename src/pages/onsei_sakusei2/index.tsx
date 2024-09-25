@@ -104,11 +104,11 @@ const Onsei_sakusei2 = () => {
           );
         } else {
           console.log(
-            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました:",
+            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました。:",
             e
           );
           alert(
-            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました"
+            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました。"
           );
         }
         return false;
