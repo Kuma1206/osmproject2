@@ -6,6 +6,10 @@
   padding-bottom: 40px; /* tabmenuと重ならないようにパディングを追加 */
 }
 
+.menubox:focus {
+  outline: none; /* 青いフォーカスの線を消す */
+}
+
 .tabmenu {
   position: fixed;
   bottom: 5px;
@@ -27,6 +31,10 @@
   background-color: #fff;
   color: #000;
   border: none;
+}
+
+.homeMain:focus {
+  outline: none; /* 青いフォーカスの線を消す */
 }
 
 .tabbox {
