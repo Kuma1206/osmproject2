@@ -3,7 +3,7 @@
   background-color: none;
   width: 100%;
   min-height: calc(100vh - 60px); /* 画面全体の高さからtabmenuの高さを引く */
-  padding-bottom: 60px; /* tabmenuと重ならないようにパディングを追加 */
+  padding-bottom: 40px; /* tabmenuと重ならないようにパディングを追加 */
 }
 
 .tabmenu {
@@ -48,16 +48,21 @@
   border-bottom: 2px solid rgb(235, 235, 235);
 }
 
-.icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.iconhome {
   width: 24px;
   height: 24px;
-  color: #000; /* 初期状態のアイコン色 */
-  fill: #000; /* 内側を透明に */
-  stroke: #000; /* 外側の線の色 */
-  stroke-width: 1px; /* 線の太さ */
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  stroke: #a1a1a1; /* 非アクティブなアイコンの枠線 */
+  fill: none; /* 非アクティブなアイコンの中身を透明に */
+}
+
+.iconActive {
+  stroke: #000; /* アクティブなアイコンの枠線 */
+  fill: #000; /* アクティブなアイコンの中身を黒に */
 }
 
 .iconClicked {

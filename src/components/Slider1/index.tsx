@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import styles from "./style.module.scss";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
@@ -17,9 +17,11 @@ const Slider1 = () => {
 
         // FirestoreのvideosコレクションからisPublicがtrueのドキュメントを取得
         const videosCollectionRef = collection(db, "videos");
+        // クエリに orderBy を追加
         const videosQuery = query(
           videosCollectionRef,
-          where("isPublic", "==", true)
+          where("isPublic", "==", true),
+          orderBy("createdAt", "desc") // 投稿日の降順でソート
         );
 
         // Firestoreクエリの結果取得

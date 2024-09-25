@@ -30,3 +30,7 @@
 .mainbox {
   color: black;
 }
+
+.menubox:focus {
+  outline: none; /* 青いフォーカスの線を消す */
+}

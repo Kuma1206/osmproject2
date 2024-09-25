@@ -8,6 +8,7 @@ import { auth, db } from "../../firebase/client";
 import UserMenu2 from "../UserMenu2";
 import { useRouter } from "next/router";
 import { onAuthStateChanged } from "firebase/auth"; // 追加
+import { headers } from "next/headers";
 
 const Mypage_profile = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);

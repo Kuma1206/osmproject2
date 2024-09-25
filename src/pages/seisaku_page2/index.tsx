@@ -1,13 +1,13 @@
 import React from "react";
 import Tab3 from "@/components/Tab3";
 import styles from "./style.module.scss";
-import Cheader from "@/components/C_header";
+import Header_White from "@/components/Header_white";
 
 const Seisaku_page2 = () => {
   return (
     <>
       <header>
-        <Cheader />
+        <Header_White />
       </header>
 
       <main className={styles.mainbox}>

@@ -12,29 +12,32 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 100);
 }
 
-// .icon {
-//   width: 24px;
-//   height: 24px;
-//   color: #fff;
-// }
-
+.menubox:focus {
+  outline: none; /* 青いフォーカスの線を消す */
+}
 
 .icon {
   width: 24px;
   height: 24px;
-  color: #fff; /* 初期状態のアイコン色 */
-  fill: none; /* 内側を透明に */
-  stroke: #fff; /* 外側の線の色 */
-  stroke-width: 1px; /* 線の太さ */
+  stroke: #ccc; /* デフォルトのアイコンの枠線をグレーに */
+  fill: none; 
+}
+
+.iconActive {
+  width: 24px;
+  height: 24px;
+  stroke: #000; 
+  fill: #000;
 }
 
 .iconClicked {
   width: 24px;
   height: 24px;
-  color: #fff; /* クリック後のアイコン色 */
-  fill: #fff; /* クリック後の内側の色を白に */
-  stroke: #fff; /* 外側の線の色 */
-  stroke-width: 1px; /* 線の太さ */
+  stroke: #fff; /* クリック後のアイコン色を白に */
+}
+
+.iconClicked:focus {
+  outline: none; /* 青いフォーカスの線を消す */
 }
 
 .iconClicked2 {
@@ -45,4 +48,8 @@
   stroke: #fff; /* 外側の線の色 */
   stroke-width: 1px; /* 線の太さ */
   // background-color: #fff;
+}
+
+.iconClicked2:focus {
+  outline: none; /* 青いフォーカスの線を消す */
 }

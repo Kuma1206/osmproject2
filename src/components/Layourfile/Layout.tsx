@@ -1,7 +1,8 @@
 import React, { ReactNode } from "react";
 import { useRouter } from "next/router";
 import { Tabs, TabList, Tab } from "react-tabs";
-import { HomeIcon, PlusIcon, UserIcon } from "@heroicons/react/outline";
+import { IoMdHome } from "react-icons/io";
+import { PlusIcon, UserIcon } from "@heroicons/react/outline";
 import classNames from "classnames";
 import styles from "./style.module.scss";
 
@@ -12,17 +13,13 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
   const isHomePage = router.pathname === "/" || router.pathname === "/home";
-  const isSeisakuPage =
-    router.pathname === "/seisaku_page2";
-  const isMyPage =
-    router.pathname === "/seisaku_page1";
+  const isSeisakuPage = router.pathname === "/seisaku_page2";
+  const isMyPage = router.pathname === "/mypage_profile";
 
   return (
     <>
       <header>{/* 共通ヘッダー */}</header>
-      <main
-        className={styles.mainbox} // ホームページかどうかでスタイルを変更
-      >
+      <main className={styles.mainbox}>
         <Tabs>
           <div className={styles.tabmenu}>
             <TabList className={styles.tabbox}>
@@ -30,11 +27,9 @@ const Layout = ({ children }: LayoutProps) => {
                 className={isHomePage ? styles.homeMain : styles.menubox}
                 onClick={() => router.push("/home")}
               >
-                <HomeIcon
-                  className={classNames(styles.icon, {
-                    [styles.iconClicked]: isHomePage,
-                    [styles.homeicon]: isHomePage,
-                  })}
+                <IoMdHome
+                  className={styles.iconhome}
+                  color={isHomePage ? "#000" : "#ccc"} // アクティブなら黒、非アクティブならグレー
                 />
               </Tab>
               <Tab
@@ -43,19 +38,17 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 <PlusIcon
                   className={classNames(styles.icon, {
-                    [styles.iconClicked]: isSeisakuPage,
-                    [styles.homeicon]: isSeisakuPage,
+                    [styles.iconActive]: isSeisakuPage,
                   })}
                 />
               </Tab>
               <Tab
                 className={isMyPage ? styles.homeMain : styles.menubox}
-                onClick={() => router.push("/seisaku_page1")}
+                onClick={() => router.push("/mypage_profile")}
               >
                 <UserIcon
                   className={classNames(styles.icon, {
-                    [styles.iconClicked]: isMyPage,
-                    [styles.homeicon]: isMyPage,
+                    [styles.iconActive]: isMyPage,
                   })}
                 />
               </Tab>

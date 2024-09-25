@@ -1,0 +1,52 @@
+.menubox {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  padding: 10px;
+  background-color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0);
+}
+
+.logo {
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  color: #000;
+}
+
+.icon {
+  display: flex;
+  align-items: center; // 縦の中央揃え
+  justify-content: center; // 横の中央揃え
+  position: absolute; // 絶対位置を指定
+  top: 8px; // 必要に応じて調整
+  right: 10px; // 必要に応じて調整
+  width: 50px; // 適切な幅を設定
+}
+
+
+.login {
+  position: absolute;  // または relative
+  top: 8px;
+  right: 10px;
+  width: 90px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  background-color: none;   
+  border-radius: 5px;        // 必要に応じてマージンを設定
+  color: #fff;
+}
+
+

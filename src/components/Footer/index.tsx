@@ -1,52 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/router";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import { HomeIcon, PlusIcon, UserIcon } from "@heroicons/react/outline";
 
-
 const Footer = () => {
   const router = useRouter();
-  const [clickedIcon, setClickedIcon] = useState<string | null>(null);
-
-  const handleIconClick = (icon: string) => {
-    setClickedIcon(icon);
-  };
 
   return (
     <ul className={styles.menubox}>
-      <Link href={"/"}>
-        <li>
+      <li>
+        <Link href={"/"}>
           <HomeIcon
             className={
-              router.pathname === "/" || clickedIcon === "home"
-                ? styles.iconClicked2
-                : styles.icon
+              router.pathname === "/" ? styles.iconActive : styles.icon
             }
-            onClick={() => handleIconClick("home")}
-          />
-        </li>
-      </Link>
-      <li>
-        <Link href={"/seisaku_page2"}>
-          <PlusIcon
-            className={
-              clickedIcon === "plus" ? styles.iconClicked : styles.icon
-            }
-            onClick={() => handleIconClick("plus")}
           />
         </Link>
       </li>
       <li>
-        <Link href="/seisaku_page1">
+        <Link href={"/seisaku_page2"}>
+          <PlusIcon
+            className={
+              router.pathname === "/seisaku_page2"
+                ? styles.iconActive
+                : styles.icon
+            }
+          />
+        </Link>
+      </li>
+      <li>
+        <Link href="/mypage_profile">
           <UserIcon
             className={
-              clickedIcon === "user" ? styles.iconClicked : styles.icon
+              router.pathname === "/mypage_profile"
+                ? styles.iconActive
+                : styles.icon
             }
-            onClick={() => {
-              handleIconClick("user");
-              console.log("Navigating to /seisaku_page1"); // ログを追加
-            }}
           />
         </Link>
       </li>

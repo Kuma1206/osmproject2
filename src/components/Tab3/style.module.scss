@@ -39,3 +39,7 @@
   border-bottom: 1px solid rgb(235, 235, 235);
   border-radius: 5px;
 }
+
+.menubox:focus {
+  outline: none; /* 青いフォーカスの線を消す */
+}

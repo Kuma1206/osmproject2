@@ -7,9 +7,11 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  deleteDoc,
   deleteField,
   Unsubscribe,
 } from "firebase/firestore";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/firebase/client"; // Firebase初期化コード
 import styles from "./style.module.scss";
@@ -35,22 +37,22 @@ const Dougaichiran = () => {
   const [videoList, setVideoList] = useState<VideoData[]>([]);
   const [loading, setLoading] = useState(true);
 
-    const fetchVideos = async (userId: string) => {
-      const videoCollectionRef = collection(firestore, "videos");
-      const q = query(videoCollectionRef, where("userId", "==", userId));
+  const fetchVideos = async (userId: string) => {
+    const videoCollectionRef = collection(firestore, "videos");
+    const q = query(videoCollectionRef, where("userId", "==", userId));
 
-      // Firestoreのvideosコレクションからデータを取得
-      const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-        const videoData = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
-          .filter((data) => data.videoUrl);
+    // Firestoreのvideosコレクションからデータを取得
+    const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+      const videoData = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
+        .filter((data) => data.videoUrl);
 
-        setVideoList(videoData);
-        setLoading(false);
-      });
+      setVideoList(videoData);
+      setLoading(false);
+    });
 
-      return unsubscribeSnapshot;
-    };
+    return unsubscribeSnapshot;
+  };
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user: User | null) => {
@@ -70,18 +72,20 @@ const Dougaichiran = () => {
     };
   }, []); // 空の依存配列により、初回マウント時にのみ実行される
 
-  const handleDelete = async (videoId: string) => {
+  const handleDelete = async (videoId: string, videoUrl: string) => {
     if (window.confirm("削除しますか？")) {
       try {
         const videoDocRef = doc(firestore, "videos", videoId);
 
-        // FirestoreからvideoUrlとthumbnailUrlを削除
-        await updateDoc(videoDocRef, {
-          videoUrl: deleteField(),
-          audioUrl: deleteField(), // audioUrlも削除
-        });
+        // Firestoreからドキュメントを削除
+        await deleteDoc(videoDocRef);
 
-        console.log("リンクと動画が削除されました。");
+        // Firebase Storageから動画ファイルを削除
+        const storage = getStorage();
+        const videoRef = ref(storage, videoUrl);
+        await deleteObject(videoRef);
+
+        console.log("ドキュメントと動画ファイルが削除されました。");
       } catch (error) {
         console.error("エラーが発生しました。:", error);
       }
@@ -119,7 +123,7 @@ const Dougaichiran = () => {
                   className={styles.backbutton}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleDelete(video.id);
+                    handleDelete(video.id, video.videoUrl); // videoUrlを追加で渡す
                   }}
                 >
                   <WeuiClose2Outlined />
