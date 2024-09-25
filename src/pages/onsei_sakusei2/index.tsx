@@ -36,8 +36,8 @@ const Onsei_sakusei2 = () => {
         // FFmpegのログを全てキャッチする
         ffmpegInstance.on("log", ({ type, message }) => {
           console.log(`[FFmpeg ${type}] ${message}`);
-          // エラータイプが含まれていたら表示
           if (type === "error" || message.toLowerCase().includes("error")) {
+            console.error(`FFmpegエラー: ${message}`);
             alert(`FFmpegエラー: ${message}`);
           }
         });
@@ -46,77 +46,35 @@ const Onsei_sakusei2 = () => {
 
         await ffmpegInstance.load({
           coreURL: "/ffmpeg/ffmpeg-core.js",
-          wasmURL: "/ffmpeg/ffmpeg-core.wasm",
+          wasmURL: "/ffmpeg/ffmpeg-core.wasm", // WebAssemblyモジュール
           workerURL: "/ffmpeg/ffmpeg-core.worker.js",
-          mainName: "main",
-          coreName: "ffmpeg-core",
-          memoryInitializerPrefixURL: "/ffmpeg/",
-          memoryInitializer: "ffmpeg-core.mem",
-          memoryInitializerRequest: {
-            mode: "no-cors",
-          },
-          memoryGrowthStep: 64 * 1024 * 1024,
-          memoryMaxGrowth: 128 * 1024 * 1024,
-        } as any);
+        });
 
         setFFmpeg(ffmpegInstance);
         setFfmpegLoaded(true);
         console.log("FFmpegが正常にロードされました");
       } catch (error) {
+        // さらに詳細なエラーログ
         console.error("FFmpegロードエラー:", error);
-
-        // エラーの詳細をアラートで表示
         if (error instanceof Error) {
           alert(
             `FFmpegのロードに失敗しました。\n\nエラー内容: ${error.message}\n\nスタックトレース:\n${error.stack}`
           );
-        } else if (typeof error === "string") {
-          alert(`FFmpegのロードに失敗しました。\n\nエラー内容: ${error}`);
         } else {
           alert("FFmpegのロードに失敗しました。不明なエラーが発生しました。");
         }
       }
     };
 
-    const isWebAssemblySupported = () => {
-      try {
-        if (
-          typeof WebAssembly === "object" &&
-          typeof WebAssembly.instantiate === "function"
-        ) {
-          console.log("WebAssemblyはサポートされています。");
-          return true;
-        } else {
-          console.log("WebAssemblyはサポートされていません。");
-          alert(
-            "お使いのブラウザはWebAssemblyをサポートしていません。最新のブラウザを使用してください。"
-          );
-          return false;
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          console.log(
-            "WebAssemblyのサポート状況チェック中にエラーが発生しました:",
-            e
-          );
-          alert(
-            `WebAssemblyのサポート状況チェック中にエラーが発生しました: ${e.message}\n\nスタックトレース:\n${e.stack}`
-          );
-        } else {
-          console.log(
-            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました。:",
-            e
-          );
-          alert(
-            "WebAssemblyのサポート状況チェック中に未知のエラーが発生しました。"
-          );
-        }
-        return false;
-      }
-    };
-
-    if (isWebAssemblySupported()) {
-      loadFFmpeg(); // FFmpegのロードを実行
+    if (
+      typeof WebAssembly === "object" &&
+      typeof WebAssembly.instantiate === "function"
+    ) {
+      loadFFmpeg();
+    } else {
+      alert(
+        "WebAssemblyがサポートされていません。最新のブラウザをご利用ください。"
+      );
     }
   }, []);
 
