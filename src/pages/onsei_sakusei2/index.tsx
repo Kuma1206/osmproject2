@@ -10,6 +10,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { app } from "@/firebase/client";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import { nanoid } from "nanoid";
 
 const auth = getAuth(app);
 const storage = getStorage(app);
@@ -285,8 +286,8 @@ const Onsei_sakusei2 = () => {
       const snapshot = await uploadBytes(mergedVideoRef, mergedBlob);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
+      // 元の`videos`コレクションへの保存
       const videoCollectionRef = doc(firestore, "videos", mergedVideoFileName);
-
       await setDoc(videoCollectionRef, {
         userId: user.uid,
         videoUrl: downloadURL,
@@ -296,11 +297,30 @@ const Onsei_sakusei2 = () => {
         status: "ready",
       });
 
-      console.log(
-        "結合された動画とサムネイルがFirebaseに保存され、Firestoreに保存されました:",
-        downloadURL
+      // 短縮URL用のランダムなIDを生成
+      const shortId = nanoid(6);
+
+      // 短縮URLを生成
+      const shortUrl = `https://osmproject.vercel.app/v/${shortId}`;
+
+      // 短縮URLも一緒にFirestoreの`videos`コレクションに保存
+      await setDoc(
+        videoCollectionRef,
+        {
+          shortUrl: shortUrl, // 短縮URLをここで追加
+          userId: user.uid,
+          videoUrl: downloadURL,
+          thumbnailUrl: thumbnailUrl,
+          isPublic: true,
+          createdAt: Date.now(),
+          status: "ready",
+        },
+        { merge: true }
       );
-      alert("結合された動画とサムネイルが保存されました！");
+
+      console.log("短縮された動画URL:", shortUrl);
+
+      alert(`結合された動画が保存されました！短縮URL: ${shortUrl}`);
     } catch (err) {
       console.error("動画の保存中にエラーが発生しました:", err);
       alert("エラーが発生しました。もう一度やり直してください。");

@@ -38,13 +38,22 @@ const Slider1 = () => {
         videoSnapshot.forEach((doc) => {
           const videoData = doc.data();
           console.log("Video document data:", videoData); // クエリ結果をログ出力
+
           if (videoData.videoUrl) {
+            // 短縮URLがあれば使用、なければ通常のURLを使う
+            const videoLink =
+              videoData.shortUrl ||
+              `/usersityougamen?videoUrl=${encodeURIComponent(
+                videoData.videoUrl
+              )}&videoDocId=${doc.id}`;
+
             allPublicVideos.push({
               videoUrl: videoData.videoUrl,
+              shortUrl: videoLink, // 短縮URLまたは通常のURLを保存
               videoDocId: doc.id,
               thumbnailUrl: videoData.thumbnailUrl || "", // サムネイルURLも追加
             });
-            console.log("Video URL added:", videoData.videoUrl);
+            console.log("Video URL added:", videoLink);
           } else {
             console.log("No videoUrl found for document");
           }
@@ -75,16 +84,7 @@ const Slider1 = () => {
         {videos.length > 0 ? (
           videos.map((video, index) => (
             <div key={index} className={styles.itembox}>
-              <Link
-                href={{
-                  pathname: `/usersityougamen`,
-                  query: {
-                    videoUrl: video.videoUrl,
-                    videoDocId: video.videoDocId,
-                    thumbnailUrl: video.thumbnailUrl, // サムネイルURLをクエリパラメータとして渡す
-                  },
-                }}
-              >
+              <Link href={video.shortUrl}>
                 <div className={styles.item}>
                   <video
                     src={video.videoUrl}
