@@ -9,7 +9,9 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/client"; // Firebaseの初期化
-import styles from "../style.module.scss"; // スタイルシートのパスを適宜調整
+import styles from "./style.module.scss"; // スタイルシートのパスを適宜調整
+import Link from "next/link";
+import WeuiClose2Outlined from "@/components/Backbutton";
 
 const VideoRedirect = () => {
   const router = useRouter();
@@ -84,23 +86,29 @@ const VideoRedirect = () => {
   }
 
   return (
-    <div className={styles.moviebox}>
-      {videoUrl ? (
-        <video
-          controls
-          width="100%"
-          controlsList="nodownload"
-          playsInline
-          muted={false}
-          poster={thumbnailUrl ? thumbnailUrl : ""} // サムネイルを表示
-        >
-          <source src={videoUrl} type="video/mp4" />
-          お使いのブラウザはvideoタグをサポートしていません。
-        </video>
-      ) : (
-        <p>動画が選択されていません。</p>
-      )}
-    </div>
+    <>
+      <div className={styles.moviebox}>
+        {videoUrl ? (
+          <video
+            controls
+            width="100%"
+            controlsList="nodownload"
+            playsInline
+            muted={false}
+            poster={thumbnailUrl ? thumbnailUrl : ""} // サムネイルを表示
+          >
+            <source src={videoUrl} type="video/mp4" />
+            お使いのブラウザはvideoタグをサポートしていません。
+          </video>
+        ) : (
+          <p>動画が選択されていません。</p>
+        )}
+      </div>
+
+      <Link href="/">
+        <WeuiClose2Outlined className={styles.backbutton} />
+      </Link>
+    </>
   );
 };
 
