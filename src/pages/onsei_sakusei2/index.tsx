@@ -307,7 +307,7 @@ const Onsei_sakusei2 = () => {
       await setDoc(
         videoCollectionRef,
         {
-          shortUrl: shortUrl, // 短縮URLをここで追加
+          shortUrl: shortUrl,
           userId: user.uid,
           videoUrl: downloadURL,
           thumbnailUrl: thumbnailUrl,
@@ -320,7 +320,9 @@ const Onsei_sakusei2 = () => {
 
       console.log("短縮された動画URL:", shortUrl);
 
-      alert(`結合された動画が保存されました！短縮URL: ${shortUrl}`);
+      // 保存完了後、自動的に `seisaku_page2` へ遷移
+      alert(`動画が保存されました!`);
+      router.push("/seisaku_page2"); // ← 保存が成功したらページを遷移
     } catch (err) {
       console.error("動画の保存中にエラーが発生しました:", err);
       alert("エラーが発生しました。もう一度やり直してください。");
@@ -335,12 +337,15 @@ const Onsei_sakusei2 = () => {
       return;
     }
 
+    // 保存プロセスの開始時点で「保存中...」を表示するためにisSavingをtrueに設定
+    setIsSaving(true);
+
     console.log("サムネイルをキャプチャ開始");
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
     try {
-      const thumbnailDataUrl = await captureThumbnail();
+      const thumbnailDataUrl = await captureThumbnail(); // サムネイルのキャプチャ
       console.log("サムネイルをキャプチャ完了");
 
       const thumbnailUrl = await uploadThumbnailToFirebase(
@@ -349,12 +354,12 @@ const Onsei_sakusei2 = () => {
       console.log("サムネイルのFirebaseアップロード完了");
 
       console.log("音声と動画の結合開始");
-      const mergedBlob = await mergeAudioVideo(audioBlob, videoUrl as string);
+      const mergedBlob = await mergeAudioVideo(audioBlob, videoUrl as string); // 音声と動画の結合
       console.log("音声と動画の結合完了");
 
       if (mergedBlob !== null && thumbnailUrl !== null) {
         console.log("結合された動画をFirebaseに保存開始");
-        await saveMergedVideoToFirebase(mergedBlob, thumbnailUrl);
+        await saveMergedVideoToFirebase(mergedBlob, thumbnailUrl); // Firebaseへの保存
         console.log("結合された動画をFirebaseに保存完了");
       } else {
         alert("動画の結合またはサムネイルの取得に失敗しました。");
@@ -365,6 +370,8 @@ const Onsei_sakusei2 = () => {
       } else {
         alert("不明なエラーが発生しました");
       }
+    } finally {
+      setIsSaving(false); // 全ての処理が完了した後、再びisSavingをfalseに設定
     }
   };
 
