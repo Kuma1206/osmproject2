@@ -1,0 +1,223 @@
+.moviebox {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mainbox1 {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  background-color: none;
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  position: absolute; /* position: absolute に変更 */
+  bottom: 40px; /* moviebox の下に配置 */
+  z-index: 1001; /* moviebox よりも低い値を設定 */
+  // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.shokaiarea {
+  bottom: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.saisei {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  margin: 0px 10px;
+  background-color: none;
+}
+
+.backbutton {
+  position: fixed; /* または absolute */
+  background-color: none;
+  width: 30px;
+  height: 30px; /* 高さも設定 */
+  top: 10px; /* 上からの距離 */
+  right: 10px; /* 右からの距離 */
+  z-index: 1001; /* 最前面に表示 */
+  color: #fff;
+}
+
+.inputbox {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.serihubox {
+  border-radius: 50px;
+  padding: 10px;
+  height: 40px;
+  width: 90%;
+}
+
+.serihubox1 {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+.serihubox2 {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  color: #fff;
+  background-color: #1d1c1c;
+  border-radius: 50px;
+  padding: 10px;
+  border: none;
+}
+
+.hozon {
+  width: 70px;
+  height: 30px;
+  border-radius: 5px;
+  border: 2px solid #000; /* 枠を表示させる */
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #dbdada;
+  font-size: 16px;
+  font-weight: 400;
+  z-index: 9999;
+}
+
+.hozonbox {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+  width: 70px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1001;
+}
+
+.sakujo {
+  width: 70px;
+  height: 30px;
+  border-radius: 5px;
+  border: 2px solid #000; /* 枠を表示させる */
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #dbdada;
+  font-size: 16px;
+  font-weight: 400;
+  z-index: 9999;
+}
+
+.sakujobox {
+  display: flex;
+  justify-content: center;
+  position: fixed; /* 絶対位置にする */
+  top: 10px; /* 上から10pxの位置 */
+  left: 50px; /* 左端から中央に配置 */
+  transform: translateX(-50%); /* 左右の中央に揃える */
+  z-index: 2000;
+  border: 1px solid #fff; /* 白色の1pxの実線を設定 */
+  border-radius: 5px;
+}
+
+
+
+.onseidougasaisei {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+  width: 120px;
+  position: fixed; /* 画面下に固定 */
+  bottom: 50px; /* 下からの距離を指定 */
+  left: 50%; /* 中央に配置 */
+  transform: translateX(-50%); /* 完全に中央にするためにX方向の位置を調整 */
+  z-index: 1001;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の背景 */
+  padding: 5px; /* ボタン周りに余白 */
+  border-radius: 5px; /* 角丸 */
+}
+
+.onseidougasaisei:hover {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+  width: 120px;
+  position: fixed; /* 画面下に固定 */
+  bottom: 50px; /* 下からの距離を指定 */
+  left: 50%; /* 中央に配置 */
+  transform: translateX(-50%); /* 完全に中央にするためにX方向の位置を調整 */
+  z-index: 1001;
+  background-color: rgba(0, 0, 0, 0.9); /* 半透明の背景 */
+  padding: 5px; /* ボタン周りに余白 */
+  border-radius: 5px; /* 角丸 */
+}
+
+
+.onseidouga {
+  width: 120px;
+  height: 30px;
+  border-radius: 5px;
+  border: none; /* 枠を表示させる */
+  background-color: rgba(0, 0, 0, 0);
+  color: #dbdada;
+  font-size: 16px;
+  font-weight: 400;
+  z-index: 9999;
+}
+
+
+///トルグ
+.togglebox {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  z-index: 1010;
+  position: absolute; /* flexからrelativeへ修正 */
+  top: 12px;
+  right: 50px;
+}
+
+.react-toggle {
+  width: 60px;
+  height: 34px;
+}
+
+.react-toggle-track {
+  background-color: #ccc;
+  transition: background-color 0.2s;
+}
+
+.react-toggle-thumb {
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+/* トグルがオンの時 */
+.react-toggle--checked .react-toggle-track {
+  background-color: #4e76aa;
+}
+
+.react-toggle--checked .react-toggle-thumb {
+  transform: translateX(26px);
+}
+
+.title {
+  padding: 0px 10px;
+  color: #fff;
+}

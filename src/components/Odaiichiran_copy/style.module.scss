@@ -1,0 +1,34 @@
+.tabmenu {
+  top: 1000px;
+}
+
+.tabbox {
+  display: flex;
+  justify-content: space-around;
+}
+
+.menubox {
+  background: none; /* Remove background if any */
+  width: auto; /* Adjust width automatically based on content */
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mainbox {
+  color: black;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+}
+
+.movebox {
+  display: flex;
+  align-items: center;
+  background-color: #000;
+  width: 33.3%;
+  height: 150px;
+  border-radius: 1px;
+  border: 1px solid #fff;
+}

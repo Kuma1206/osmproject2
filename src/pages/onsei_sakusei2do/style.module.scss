@@ -1,0 +1,213 @@
+.moviebox {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.moviebox video {
+  z-index: 1; /* 動画の z-index を低く設定 */
+  position: relative; /* z-index を適用するために position を指定 */
+}
+
+.mainbox1 {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  background-color: none;
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  position: absolute; /* position: absolute に変更 */
+  bottom: 40px; /* moviebox の下に配置 */
+  z-index: 1001; /* moviebox よりも低い値を設定 */
+  // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.shokaiarea {
+  bottom: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.saisei {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  margin: 0px 10px;
+  background-color: none;
+}
+
+.backbutton {
+  position: fixed; /* または absolute */
+  background-color: none;
+  color: #fff;
+  width: 30px;
+  height: 30px; /* 高さも設定 */
+  top: 10px; /* 上からの距離 */
+  right: 10px; /* 右からの距離 */
+  z-index: 1001; /* 最前面に表示 */
+}
+
+.inputbox {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.serihubox {
+  border-radius: 50px;
+  padding: 10px;
+  height: 40px;
+  width: 90%;
+}
+
+.serihubox1 {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+.serihubox2 {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  color: #fff;
+  background-color: #1d1c1c;
+  border-radius: 50px;
+  padding: 10px;
+  border: none;
+}
+
+.onseisaisei {
+  width: 100%;
+  height: 30px;
+  border-radius: 5px;
+  border: 2px solid #000; /* 枠を表示させる */
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #dbdada;
+  font-size: 16px;
+  font-weight: 400;
+  z-index: 5555;
+}
+
+.onseisaiseibox {
+  display: flex;
+  position: fixed; /* 固定位置 */
+  justify-content: center;
+  align-items: center; /* 縦方向の中央揃え */
+  bottom: 20%; /* 下から20% */
+  left: 48%; /* 左から50%で左右中央 */
+  transform: translate(-50%, 0); /* 水平方向のみ中央揃え */
+  margin: 10px;
+  width: 150px;
+  z-index: 5555;
+}
+
+.hozonbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: 0.5px solid #fff; /* 白色の1pxの実線を設定 */
+  border-radius: 5px;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  // width: 50px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  z-index: 10001;
+}
+
+.hozonbox:hover {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  // width: 50px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  z-index: 10001;
+}
+
+.hozon {
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+}
+
+.microphoneIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background-color: #1d1c1c;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 10002;
+  position: fixed;
+  bottom: 10%; /* 下から10% */
+  left: 50%; /* 左から50% */
+  transform: translate(-50%, 0); /* 水平方向のみ中央揃え */
+}
+
+.microphoneIconContainer:hover {
+  background-color: #333;
+}
+
+.microphoneIcon {
+  color: #fff;
+  font-size: 24px;
+  position: relative; /* 中央揃えに対応するために position: relative */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recordingIndicator {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 0, 0, 0.7); /* 赤い円 */
+  animation: recordingPulse 1.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes recordingPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

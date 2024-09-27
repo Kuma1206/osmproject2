@@ -4,7 +4,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/client";
 import Link from "next/link";
 
-const Odaiidhiran = () => {
+const Odaiidhiran_copy = () => {
   const [videos, setVideos] = useState<any[]>([]); // サムネイルと動画URLのオブジェクト配列
 
   useEffect(() => {
@@ -67,4 +67,4 @@ const Odaiidhiran = () => {
   );
 };
 
-export default Odaiidhiran;
+export default Odaiidhiran_copy;

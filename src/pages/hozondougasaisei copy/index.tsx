@@ -5,13 +5,7 @@ import WeuiClose2Outlined from "@/components/Backbutton";
 import Link from "next/link";
 import "react-toggle/style.css";
 import Toggle from "react-toggle";
-import {
-  doc,
-  updateDoc,
-  getDoc,
-  onSnapshot,
-  deleteDoc,
-} from "firebase/firestore"; // onSnapshot を追加
+import { doc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db, storage } from "@/firebase/client";
 import { deleteObject, ref } from "firebase/storage";
 
@@ -19,9 +13,8 @@ const Hozondougasaisei = () => {
   const [checked, setChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { userId, videoUrl, audioUrl, videoDocId } = router.query; // audioUrl を追加
+  const { userId, videoUrl, videoDocId } = router.query;
   const videoRef = useRef<HTMLVideoElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null); // 音声の参照用
 
   useEffect(() => {
     const fetchIsPublic = async () => {
@@ -35,32 +28,24 @@ const Hozondougasaisei = () => {
         console.log(
           `Fetching document for userId: ${userId}, videoDocId: ${videoDocId}`
         );
-        const videoDocRef = doc(
-          db,
-          `user_audio/${userId}/audio`, // user_audioの中にアクセス
-          videoDocId as string
-        );
+        const videoDocRef = doc(db, "videos", videoDocId as string);
+        const videoDoc = await getDoc(videoDocRef);
 
-        // ドキュメントの変更をリアルタイムに監視
-        const unsubscribe = onSnapshot(videoDocRef, (videoDoc) => {
-          if (videoDoc.exists()) {
-            const data = videoDoc.data();
-            console.log("Firestore から取得したデータ:", data);
-            if (data?.isPublic !== undefined) {
-              setChecked(data.isPublic);
-              console.log("トグルの初期値を設定しました:", data.isPublic);
-            } else {
-              console.warn(
-                "isPublic フィールドが存在しません。デフォルトで false に設定されます。"
-              );
-              setChecked(false); // isPublic が存在しない場合は false に設定
-            }
+        if (videoDoc.exists()) {
+          const data = videoDoc.data();
+          console.log("Firestore から取得したデータ:", data);
+          if (data?.isPublic !== undefined) {
+            setChecked(data.isPublic);
+            console.log("トグルの初期値を設定しました:", data.isPublic);
           } else {
-            console.error("指定されたドキュメントが存在しません。");
+            console.warn(
+              "isPublic フィールドが存在しません。デフォルトで false に設定されます。"
+            );
+            setChecked(false); // isPublic が存在しない場合は false に設定
           }
-        });
-
-        return unsubscribe; // コンポーネントがアンマウントされたときにクリーンアップする
+        } else {
+          console.error("指定されたドキュメントが存在しません。");
+        }
       } catch (error) {
         console.error(
           "Firestore から isPublic を取得する際にエラーが発生しました:",
@@ -86,11 +71,7 @@ const Hozondougasaisei = () => {
     }
 
     try {
-      const videoDocRef = doc(
-        db,
-        `user_audio/${userId}/audio`,
-        videoDocId as string
-      ); // Firestore の正しいパス
+      const videoDocRef = doc(db, "videos", videoDocId as string);
       await updateDoc(videoDocRef, { isPublic: newChecked });
       console.log("isPublic が正常に保存されました:", newChecked);
     } catch (error) {
@@ -99,17 +80,15 @@ const Hozondougasaisei = () => {
   };
 
   const handlePlay = () => {
-    if (videoRef.current && audioRef.current) {
-      audioRef.current.currentTime = 0; // 音声を先頭から再生
-      audioRef.current.play(); // 音声を再生
-      videoRef.current.play(); // 動画を再生
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
     }
   };
 
   const handlePause = () => {
-    if (videoRef.current && audioRef.current) {
-      audioRef.current.pause(); // 音声を停止
-      videoRef.current.pause(); // 動画を停止
+    if (videoRef.current) {
+      videoRef.current.pause();
     }
   };
 
@@ -121,11 +100,7 @@ const Hozondougasaisei = () => {
         const videoRefInStorage = ref(storage, videoUrl as string);
         await deleteObject(videoRefInStorage);
 
-        const videoDocRef = doc(
-          db,
-          `user_audio/${userId}/audio`,
-          videoDocId as string
-        );
+        const videoDocRef = doc(db, "videos", videoDocId as string);
         await deleteDoc(videoDocRef);
 
         console.log("動画データが正常に削除されました。");
@@ -145,7 +120,7 @@ const Hozondougasaisei = () => {
   return (
     <>
       <div className={styles.moviebox}>
-        {videoUrl && audioUrl ? ( // audioUrl をチェック
+        {videoUrl ? (
           <>
             <video
               ref={videoRef}
@@ -159,13 +134,9 @@ const Hozondougasaisei = () => {
               <source src={videoUrl as string} type="video/mp4" />
               お使いのブラウザは動画タグをサポートしていません。
             </video>
-            <audio ref={audioRef}>
-              <source src={audioUrl as string} type="audio/mp4" />
-              お使いのブラウザは音声タグをサポートしていません。
-            </audio>
           </>
         ) : (
-          <p>動画または音声が選択されていません。</p>
+          <p>動画が選択されていません。</p>
         )}
       </div>
 

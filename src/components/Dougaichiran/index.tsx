@@ -2,14 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   getFirestore,
   collection,
-  query,
-  where,
   onSnapshot,
   doc,
-  updateDoc,
   deleteDoc,
-  deleteField,
-  Unsubscribe,
 } from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
@@ -26,10 +21,8 @@ interface VideoData {
   videoUrl: string;
   audioUrl: string;
   userId: string;
-  status: string;
   createdAt: number;
-  updatedAt?: number;
-  thumbnailUrl?: string; // ここに thumbnailUrl プロパティを追加
+  thumbnailUrl?: string;
   isPublic?: boolean;
 }
 
@@ -38,14 +31,23 @@ const Dougaichiran = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchVideos = async (userId: string) => {
-    const videoCollectionRef = collection(firestore, "videos");
-    const q = query(videoCollectionRef, where("userId", "==", userId));
+    const audioCollectionRef = collection(
+      firestore,
+      `user_audio/${userId}/audio`
+    );
 
-    // Firestoreのvideosコレクションからデータを取得
-    const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+    console.log("Firestore query: ", audioCollectionRef);
+
+    // Firestoreのuser_audioコレクションからデータを取得
+    const unsubscribeSnapshot = onSnapshot(audioCollectionRef, (snapshot) => {
       const videoData = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
-        .filter((data) => data.videoUrl);
+        .map((doc) => {
+          console.log("Document data: ", doc.data());
+          return { id: doc.id, ...doc.data() } as VideoData;
+        })
+        .filter((data) => data.videoUrl); // videoUrlが存在するデータのみをフィルタ
+
+      console.log("Filtered video data: ", videoData);
 
       setVideoList(videoData);
       setLoading(false);
@@ -70,12 +72,16 @@ const Dougaichiran = () => {
       console.log("Dougaichiran component unmounted.");
       if (unsubscribeAuth) unsubscribeAuth();
     };
-  }, []); // 空の依存配列により、初回マウント時にのみ実行される
+  }, []);
 
   const handleDelete = async (videoId: string, videoUrl: string) => {
     if (window.confirm("削除しますか？")) {
       try {
-        const videoDocRef = doc(firestore, "videos", videoId);
+        const videoDocRef = doc(
+          firestore,
+          `user_audio/${auth.currentUser?.uid}/audio`,
+          videoId
+        );
 
         // Firestoreからドキュメントを削除
         await deleteDoc(videoDocRef);
@@ -111,6 +117,7 @@ const Dougaichiran = () => {
                 query: {
                   userId: auth.currentUser?.uid, // ユーザーIDを追加
                   videoUrl: video.videoUrl,
+                  audioUrl: video.audioUrl, // audioUrl も追加
                   videoDocId: video.id, // videoDocIdをクエリパラメータとして追加
                   isPublic: video.isPublic, // isPublic プロパティを追加
                 },

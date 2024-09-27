@@ -23,6 +23,7 @@
     "@mui/material": "^5.16.7",
     "@mui/system": "^5.16.7",
     "@types/uuid": "^10.0.0",
+    "cors": "^2.8.5",
     "css.gg": "^2.1.1",
     "firebase": "^10.13.0",
     "firebase-admin": "^12.4.0",
