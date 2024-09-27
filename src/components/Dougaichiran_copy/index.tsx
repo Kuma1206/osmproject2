@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getFirestore,
   collection,
+  query,
+  where,
   onSnapshot,
   doc,
   updateDoc,
   deleteField,
+  Unsubscribe,
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/firebase/client"; // Firebase初期化コード
 import styles from "./style.module.scss";
 import Link from "next/link";
@@ -20,82 +23,67 @@ interface VideoData {
   id: string;
   videoUrl: string;
   audioUrl: string;
-  thumbnailUrl?: string; // サムネイルURLを追加
+  userId: string;
+  status: string;
+  createdAt: number;
+  updatedAt?: number;
+  thumbnailUrl?: string; // ここに thumbnailUrl プロパティを追加
+  isPublic?: boolean;
 }
 
-const Dougaichiran_copy = () => {
+const Dougaichiran = () => {
   const [videoList, setVideoList] = useState<VideoData[]>([]);
-  const [loading, setLoading] = useState(true); // ローディング状態
-  const audioRefs = useRef<HTMLAudioElement[]>([]); // 複数の音声を参照するための配列
+  const [loading, setLoading] = useState(true);
+
+  const fetchVideos = async (userId: string) => {
+    const videoCollectionRef = collection(firestore, "videos");
+    const q = query(videoCollectionRef, where("userId", "==", userId));
+
+    // Firestoreのvideosコレクションからデータを取得
+    const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+      const videoData = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
+        .filter((data) => data.videoUrl);
+
+      setVideoList(videoData);
+      setLoading(false);
+    });
+
+    return unsubscribeSnapshot;
+  };
 
   useEffect(() => {
-    audioRefs.current = []; // videoListが更新されるたびにaudioRefsをクリア
-  }, [videoList]);
-
-  useEffect(() => {
-    const fetchVideos = async (userId: string) => {
-      const audioCollectionRef = collection(
-        firestore,
-        `user_audio/${userId}/audio`
-      );
-
-      const unsubscribe = onSnapshot(audioCollectionRef, (snapshot) => {
-        const videoData = snapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
-          .filter((data) => {
-            return data.videoUrl && data.audioUrl; // videoUrlとaudioUrlがあるものだけを表示
-          });
-
-        setVideoList(videoData);
-        setLoading(false); // ローディング完了
-      });
-
-      return () => unsubscribe();
-    };
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        console.log("ユーザーID:", user.uid); // 確認用ログ
-        fetchVideos(user.uid);
+        console.log("User logged in: ", user.uid);
+        fetchVideos(user.uid); // ユーザーがログインしている時のみデータを取得
       } else {
+        console.log("No user logged in");
         setVideoList([]);
         setLoading(false);
       }
     });
 
-    return () => unsubscribe();
-  }, []);
-
-  const handlePlay = (index: number) => {
-    if (audioRefs.current[index]) {
-      audioRefs.current[index].play(); // 動画再生時に音声も再生
-    }
-  };
-
-  const handlePause = (index: number) => {
-    if (audioRefs.current[index]) {
-      audioRefs.current[index].pause(); // 動画停止時に音声も停止
-    }
-  };
+    return () => {
+      console.log("Dougaichiran component unmounted.");
+      if (unsubscribeAuth) unsubscribeAuth();
+    };
+  }, []); // 空の依存配列により、初回マウント時にのみ実行される
 
   const handleDelete = async (videoId: string) => {
     if (window.confirm("削除しますか？")) {
       try {
-        const videoDocRef = doc(
-          firestore,
-          `user_audio/${auth.currentUser?.uid}/audio`,
-          videoId
-        );
+        const videoDocRef = doc(firestore, "videos", videoId);
 
-        // FirestoreからaudioURLとvideoURLを削除
+        // FirestoreからvideoUrlとthumbnailUrlを削除
         await updateDoc(videoDocRef, {
-          audioUrl: deleteField(),
           videoUrl: deleteField(),
+          audioUrl: deleteField(), // audioUrlも削除
         });
 
-        console.log("リンクが削除されました");
+        console.log("リンクと動画が削除されました。");
       } catch (error) {
-        console.error("エラーが発生しました:", error);
+        console.error("エラーが発生しました。:", error);
       }
     }
   };
@@ -107,70 +95,52 @@ const Dougaichiran_copy = () => {
   return (
     <div className={styles.mainbox}>
       {videoList.length > 0 ? (
-        videoList.map((video, index) => {
-          console.log("Link parameters:", {
-            videoUrl: video.videoUrl,
-            audioUrl: video.audioUrl,
-            userId: auth.currentUser?.uid,
-            audioDocId: video.id,
-          });
-
-          return (
-            <div
-              id={`movebox-${video.id}`}
-              key={video.id}
-              className={styles.movebox}
+        videoList.map((video) => (
+          <div
+            id={`movebox-${video.id}`}
+            key={video.id}
+            className={styles.movebox}
+          >
+            <Link
+              href={{
+                pathname: "/hozondougasaisei_copy",
+                query: {
+                  userId: auth.currentUser?.uid, // ユーザーIDを追加
+                  videoUrl: video.videoUrl,
+                  videoDocId: video.id, // videoDocIdをクエリパラメータとして追加
+                  isPublic: video.isPublic, // isPublic プロパティを追加
+                },
+              }}
             >
-              <Link
-                href={{
-                  pathname: "/hozondougasaisei",
-                  query: {
-                    videoUrl: video.videoUrl,
-                    audioUrl: video.audioUrl,
-                    userId: auth.currentUser?.uid,
-                    audioDocId: video.id,
-                  },
-                }}
-                key={video.id}
+              <div
+                style={{ width: "100%", height: "100%", overflow: "hidden" }}
               >
                 <div
-                  style={{ width: "100%", height: "100%", overflow: "hidden" }}
+                  className={styles.backbutton}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete(video.id);
+                  }}
                 >
-                  <div
-                    className={styles.backbutton}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDelete(video.id);
-                    }}
-                  >
-                    <WeuiClose2Outlined />
-                  </div>
-
-                  {video.thumbnailUrl ? (
-                    <img
-                      src={video.thumbnailUrl}
-                      alt="サムネイル"
-                      width="100%"
-                      height="100%"
-                      style={{ objectFit: "cover" }}
-                    />
-                  ) : (
-                    <p>サムネイルがありません</p>
-                  )}
-
-                  <audio
-                    ref={(el) => {
-                      audioRefs.current[index] = el!;
-                    }}
-                  >
-                    <source src={video.audioUrl} type="audio/wav" />
-                    お使いのブラウザは音声タグをサポートしていません。
-                  </audio>
+                  <WeuiClose2Outlined />
                 </div>
-              </Link>
-            </div>
-          );
-        })
+
+                {/* サムネイル表示 */}
+                {video.thumbnailUrl ? (
+                  <img
+                    src={video.thumbnailUrl}
+                    alt="サムネイル"
+                    width="100%"
+                    height="100%"
+                    style={{ objectFit: "cover" }}
+                  />
+                ) : (
+                  <p>サムネイルがありません</p>
+                )}
+              </div>
+            </Link>
+          </div>
+        ))
       ) : (
         <p>動画がまだ保存されていません。</p>
       )}
@@ -178,4 +148,4 @@ const Dougaichiran_copy = () => {
   );
 };
 
-export default Dougaichiran_copy;
+export default Dougaichiran;

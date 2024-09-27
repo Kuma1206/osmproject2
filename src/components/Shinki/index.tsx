@@ -2,7 +2,7 @@ import React from "react";
 import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
 import styles from "./style.module.scss";
 import "react-tabs/style/react-tabs.css";
-import Odaiidhiran from "@/components/Odaiichiran";
+import Odaiidhiran_copy from "@/components/Odaiichiran_copy";
 import Shinarioichiran from "@/components/Shinarioichiran";
 import Afurecoichiran from "@/components/Afurecoichiran";
 
@@ -21,7 +21,7 @@ const Shinki = () => {
 
           <TabPanel>
             <div>
-              <Odaiidhiran />
+              <Odaiidhiran_copy />
             </div>{" "}
           </TabPanel>
           <TabPanel>

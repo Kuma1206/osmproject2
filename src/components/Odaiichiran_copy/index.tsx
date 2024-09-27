@@ -4,7 +4,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/client";
 import Link from "next/link";
 
-const Odaiidhiran_copy = () => {
+const Odaiidhiran = () => {
   const [videos, setVideos] = useState<any[]>([]); // サムネイルと動画URLのオブジェクト配列
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const Odaiidhiran_copy = () => {
           {videos.map((video, index) => (
             <Link
               href={{
-                pathname: "/onsei_sakusei2do",
+                pathname: "/onsei_sakusei2_copy",
                 query: { videoUrl: video.url },
               }}
               key={index}
@@ -67,4 +67,4 @@ const Odaiidhiran_copy = () => {
   );
 };
 
-export default Odaiidhiran_copy;
+export default Odaiidhiran;

@@ -9,7 +9,7 @@ import { doc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db, storage } from "@/firebase/client";
 import { deleteObject, ref } from "firebase/storage";
 
-const Hozondougasaisei = () => {
+const Hozondougasaisei_copy = () => {
   const [checked, setChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -165,4 +165,4 @@ const Hozondougasaisei = () => {
   );
 };
 
-export default Hozondougasaisei;
+export default Hozondougasaisei_copy;
