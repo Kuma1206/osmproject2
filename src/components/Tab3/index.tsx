@@ -3,7 +3,7 @@ import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
 import styles from "./style.module.scss";
 import "react-tabs/style/react-tabs.css";
 import Shinki from "@/components/Shinki";
-import Dougaichiran_copy from "@/components/Dougaichiran_copy";
+import Dougaichiran from "@/components/Dougaichiran";
 import Ichijihozon from "@/components/Ichijihozon";
 
 const Tab3 = () => {
@@ -20,7 +20,7 @@ const Tab3 = () => {
 
         <TabPanel>
           <div>
-            <Dougaichiran_copy />
+            <Dougaichiran />
           </div>{" "}
         </TabPanel>
         <TabPanel>
