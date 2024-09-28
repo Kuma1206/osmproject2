@@ -36,7 +36,7 @@ const Dougaichiran = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchVideos = async (userId: string) => {
-    const videoCollectionRef = collection(firestore, "videos");
+    const videoCollectionRef = collection(firestore, "user_videos");
     const q = query(videoCollectionRef, where("userId", "==", userId));
 
     // Firestoreのvideosコレクションからデータを取得
@@ -73,7 +73,7 @@ const Dougaichiran = () => {
   const handleDelete = async (videoId: string) => {
     if (window.confirm("削除しますか？")) {
       try {
-        const videoDocRef = doc(firestore, "videos", videoId);
+        const videoDocRef = doc(firestore, "user_videos", videoId);
 
         // FirestoreからvideoUrlとthumbnailUrlを削除
         await updateDoc(videoDocRef, {

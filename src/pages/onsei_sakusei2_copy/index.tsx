@@ -286,8 +286,12 @@ const Onsei_sakusei2_copy = () => {
       const snapshot = await uploadBytes(mergedVideoRef, mergedBlob);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
-      // 元の`videos`コレクションへの保存
-      const videoCollectionRef = doc(firestore, "videos", mergedVideoFileName);
+      // `user_videos` コレクションへの保存
+      const videoCollectionRef = doc(
+        firestore,
+        "user_videos",
+        mergedVideoFileName
+      );
       await setDoc(videoCollectionRef, {
         userId: user.uid,
         videoUrl: downloadURL,
@@ -303,7 +307,7 @@ const Onsei_sakusei2_copy = () => {
       // 短縮URLを生成
       const shortUrl = `https://osmproject.vercel.app/v/${shortId}`;
 
-      // 短縮URLも一緒にFirestoreの`videos`コレクションに保存
+      // 短縮URLも一緒にFirestoreの`user_videos`コレクションに保存
       await setDoc(
         videoCollectionRef,
         {

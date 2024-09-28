@@ -28,7 +28,7 @@ const Hozondougasaisei_copy = () => {
         console.log(
           `Fetching document for userId: ${userId}, videoDocId: ${videoDocId}`
         );
-        const videoDocRef = doc(db, "videos", videoDocId as string);
+        const videoDocRef = doc(db, "user_videos", videoDocId as string);
         const videoDoc = await getDoc(videoDocRef);
 
         if (videoDoc.exists()) {
@@ -71,7 +71,7 @@ const Hozondougasaisei_copy = () => {
     }
 
     try {
-      const videoDocRef = doc(db, "videos", videoDocId as string);
+      const videoDocRef = doc(db, "user_videos", videoDocId as string);
       await updateDoc(videoDocRef, { isPublic: newChecked });
       console.log("isPublic が正常に保存されました:", newChecked);
     } catch (error) {
@@ -100,7 +100,7 @@ const Hozondougasaisei_copy = () => {
         const videoRefInStorage = ref(storage, videoUrl as string);
         await deleteObject(videoRefInStorage);
 
-        const videoDocRef = doc(db, "videos", videoDocId as string);
+        const videoDocRef = doc(db, "user_videos", videoDocId as string);
         await deleteDoc(videoDocRef);
 
         console.log("動画データが正常に削除されました。");
