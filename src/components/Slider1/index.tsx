@@ -107,7 +107,7 @@ const Slider1 = () => {
 
   return (
     <div className={styles.menubox}>
-      <p className={styles.title1}>動画一覧</p>
+      <p className={styles.title1}></p>
       <Swiper
         direction="vertical"
         spaceBetween={30}
@@ -122,20 +122,40 @@ const Slider1 = () => {
         {randomVideos.length > 0 ? (
           randomVideos.map((video, index) => (
             <SwiperSlide key={index} className={styles.itembox}>
-              <Link href={video.shortUrl}>
-                <div className={styles.item}>
+              <Link
+                href={{
+                  pathname: "/usersityougamen",
+                  query: {
+                    videoDocId: video.videoDocId,
+                    thumbnailUrl: video.thumbnailUrl,
+                    shortUrl: video.shortUrl,
+                    videoUrl: video.videoUrl, // videoUrlを渡す
+                  },
+                }}
+              >
+                <div
+                  className={styles.item}
+                  onClick={() => {
+                    console.log("Navigating to video:", {
+                      videoDocId: video.videoDocId,
+                      thumbnailUrl: video.thumbnailUrl,
+                      shortUrl: video.shortUrl,
+                      videoUrl: video.videoUrl,
+                    });
+                  }}
+                >
                   <video
                     ref={(el) => {
-                      videoRefs.current[index] = el; // 各動画のrefを保存
+                      videoRefs.current[index] = el;
                     }}
                     src={video.videoUrl}
                     width="100%"
                     height="10%"
                     autoPlay
                     controls={false}
-                    loop={false} // ループ再生を無効化
-                    onEnded={handleVideoEnded} // 再生終了時に次のスライドへ
-                    poster={video.thumbnailUrl || video.videoUrl} // サムネイルまたは動画のURLを表示
+                    loop={false}
+                    onEnded={handleVideoEnded}
+                    poster={video.thumbnailUrl || video.videoUrl}
                   >
                     お使いのブラウザはvideoタグをサポートしていません。
                   </video>

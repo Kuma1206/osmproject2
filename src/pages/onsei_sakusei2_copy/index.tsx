@@ -277,7 +277,7 @@ const Onsei_sakusei2_copy = () => {
         throw new Error("ユーザーが認証されていません");
       }
 
-      const mergedVideoFileName = `merged_video_${Date.now()}.mp4`;
+      const mergedVideoFileName = `merged_video_${Date.now()}`;
       const mergedVideoRef = ref(
         storage,
         `user_videos/${user.uid}/${mergedVideoFileName}`
