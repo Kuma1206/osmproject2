@@ -5,19 +5,27 @@ import Avatar from "../Avatar";
 import { CogIcon, LogoutIcon, UserIcon } from "@heroicons/react/solid";
 import MenuLink from "../Menu-link.tsx";
 import { logout } from "../../lib/auth";
-import { useRouter } from "next/router"; 
+import { useRouter } from "next/router";
 import styles from "./style.module.scss"; // SCSSスタイルをインポート
 
 const links = [
   {
+    label: "β機能",
+    icon: <UserIcon />,
+    path: "https://navygoat27.sakura.ne.jp/video-streaming-site/", // 外部リンク
+    external: true, // 外部リンクの場合はフラグを立てる
+  },
+  {
     label: "マイページ",
     icon: <UserIcon />,
     path: "/mypage",
+    external: false, // 内部リンクの場合はfalse
   },
   {
     label: "設定",
     icon: <CogIcon />,
     path: "/settings",
+    external: false,
   },
 ];
 
@@ -51,7 +59,7 @@ const UserMenu = () => {
   const handleLogout = async () => {
     await logout(); // ログアウト処理を待機
     router.push("/"); // ホームページにリダイレクト
-  };  
+  };
 
   if (!user) {
     return null;
@@ -75,15 +83,30 @@ const UserMenu = () => {
           <div className={styles.menuLinks}>
             {links.map((link) => (
               <Menu.Item key={link.path}>
-                {({ active }) => (
-                  <MenuLink href={link.path}>
-                    <ListItem
-                      icon={link.icon}
-                      label={link.label}
-                      active={active}
-                    />
-                  </MenuLink>
-                )}
+                {({ active }) =>
+                  link.external ? (
+                    <a
+                      href={link.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.link}
+                    >
+                      <ListItem
+                        icon={link.icon}
+                        label={link.label}
+                        active={active}
+                      />
+                    </a>
+                  ) : (
+                    <MenuLink href={link.path}>
+                      <ListItem
+                        icon={link.icon}
+                        label={link.label}
+                        active={active}
+                      />
+                    </MenuLink>
+                  )
+                }
               </Menu.Item>
             ))}
           </div>
