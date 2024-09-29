@@ -5,7 +5,7 @@ import Avatar from "../Avatar";
 import { CogIcon, LogoutIcon, UserIcon } from "@heroicons/react/solid";
 import MenuLink from "../Menu-link.tsx";
 import { logout } from "../../lib/auth";
-import { useRouter } from "next/router";
+import { useRouter } from "next/router"; 
 import styles from "./style.module.scss"; // SCSSスタイルをインポート
 
 const links = [
@@ -18,14 +18,12 @@ const links = [
   {
     label: "マイページ",
     icon: <UserIcon />,
-    path: "/mypage",
-    external: false, // 内部リンクの場合はfalse
+    path: "/mypage_profile",
   },
   {
     label: "設定",
     icon: <CogIcon />,
     path: "/settings",
-    external: false,
   },
 ];
 
@@ -59,7 +57,7 @@ const UserMenu = () => {
   const handleLogout = async () => {
     await logout(); // ログアウト処理を待機
     router.push("/"); // ホームページにリダイレクト
-  };
+  };  
 
   if (!user) {
     return null;
@@ -83,30 +81,15 @@ const UserMenu = () => {
           <div className={styles.menuLinks}>
             {links.map((link) => (
               <Menu.Item key={link.path}>
-                {({ active }) =>
-                  link.external ? (
-                    <a
-                      href={link.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.link}
-                    >
-                      <ListItem
-                        icon={link.icon}
-                        label={link.label}
-                        active={active}
-                      />
-                    </a>
-                  ) : (
-                    <MenuLink href={link.path}>
-                      <ListItem
-                        icon={link.icon}
-                        label={link.label}
-                        active={active}
-                      />
-                    </MenuLink>
-                  )
-                }
+                {({ active }) => (
+                  <MenuLink href={link.path}>
+                    <ListItem
+                      icon={link.icon}
+                      label={link.label}
+                      active={active}
+                    />
+                  </MenuLink>
+                )}
               </Menu.Item>
             ))}
           </div>
