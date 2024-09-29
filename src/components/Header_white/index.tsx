@@ -24,7 +24,7 @@ const Header_whtie = () => {
   return (
     <ul className={styles.menubox}>
       <Link href="/">
-        <li className={styles.logo}>logo</li>
+        <li className={styles.logo}>Kuma</li>
       </Link>
       <div className={styles.login}>
         {user === null && !waiting && <p onClick={signIn}>login</p>}

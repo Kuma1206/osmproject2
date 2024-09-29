@@ -164,7 +164,7 @@ const Slider1 = () => {
             </SwiperSlide>
           ))
         ) : (
-          <p>保存された動画がありません。</p>
+          <p></p>
         )}
       </Swiper>
     </div>

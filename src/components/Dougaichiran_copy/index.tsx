@@ -8,8 +8,10 @@ import {
   doc,
   updateDoc,
   deleteField,
+  deleteDoc,
   Unsubscribe,
 } from "firebase/firestore";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/firebase/client"; // Firebase初期化コード
 import styles from "./style.module.scss";
@@ -70,18 +72,20 @@ const Dougaichiran = () => {
     };
   }, []); // 空の依存配列により、初回マウント時にのみ実行される
 
-  const handleDelete = async (videoId: string) => {
+  const handleDelete = async (videoId: string, videoUrl: string) => {
     if (window.confirm("削除しますか？")) {
       try {
         const videoDocRef = doc(firestore, "user_videos", videoId);
+        const storage = getStorage(app);
+        const videoRef = ref(storage, videoUrl); // videoUrl を使って Firebase Storage の参照を取得
 
-        // FirestoreからvideoUrlとthumbnailUrlを削除
-        await updateDoc(videoDocRef, {
-          videoUrl: deleteField(),
-          audioUrl: deleteField(), // audioUrlも削除
-        });
+        // Firestore のドキュメントを削除
+        await deleteDoc(videoDocRef);
 
-        console.log("リンクと動画が削除されました。");
+        // Firebase Storage から MP4 データを削除
+        await deleteObject(videoRef);
+
+        console.log("動画とFirebase Storageのデータが削除されました。");
       } catch (error) {
         console.error("エラーが発生しました。:", error);
       }
@@ -119,7 +123,7 @@ const Dougaichiran = () => {
                   className={styles.backbutton}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleDelete(video.id);
+                    handleDelete(video.id, video.videoUrl);
                   }}
                 >
                   <WeuiClose2Outlined />

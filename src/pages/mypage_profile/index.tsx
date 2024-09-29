@@ -29,7 +29,7 @@ const MypageProfile = ({ params }: { params: Params }) => {
     savedItems: ["保存した動画1", "保存した動画2", "保存した動画2"],
   });
 
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState(currentUser.image);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editedName, setEditedName] = useState(currentUser.name);
   const [editedUsername, setEditedUsername] = useState(currentUser.username);
@@ -44,24 +44,26 @@ const MypageProfile = ({ params }: { params: Params }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // ユーザーがログインしている場合、プロフィールデータを取得
+        // ユーザーがログインしている場合、Firestoreからプロフィールデータを取得
         const userId = user.uid;
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          const imageUrl = userData.photoURL || currentUser.image;
+
+          // FirestoreのデータをcurrentUserに反映
           setCurrentUser({
             ...currentUser,
             name: userData.name || currentUser.name,
             username: userData.username || currentUser.username,
-            image: userData.photoURL || currentUser.image,
+            image: imageUrl, // ここでFirestoreの画像URLを使用
             bio: userData.bio || currentUser.bio,
             gender: userData.gender || currentUser.gender,
             link: userData.link || currentUser.link,
           });
-          setProfileImage(userData.photoURL || null);
+          setProfileImage(imageUrl || null); // Firestoreから取得した画像を表示
         }
       } else {
-        // ログインしていない場合はデフォルト状態を表示するだけに変更
         console.log("ユーザーがログインしていません");
       }
     });
@@ -85,6 +87,7 @@ const MypageProfile = ({ params }: { params: Params }) => {
             { photoURL: imageUrl },
             { merge: true }
           );
+          setProfileImage(imageUrl); // 画像アップロード後、表示を更新
         }
       } catch (error) {
         console.error("画像のアップロードに失敗しました:", error);
@@ -235,9 +238,9 @@ const MypageProfile = ({ params }: { params: Params }) => {
               <div className="mb-4">
                 <p className="mb-2">プロフィール画像:</p>
                 <img
-                  src={editedImage}
-                  alt="Profile Preview"
                   className={styles.profileImage}
+                  src={currentUser.image}
+                  alt="Profile"
                 />
                 <input type="file" onChange={handleImageChange} />
               </div>
@@ -250,7 +253,6 @@ const MypageProfile = ({ params }: { params: Params }) => {
                   onChange={(e) => setEditedName(e.target.value)}
                 />
               </label>
-
               <label className={styles.inputField}>
                 ユーザー名:
                 <input
@@ -259,7 +261,6 @@ const MypageProfile = ({ params }: { params: Params }) => {
                   onChange={(e) => setEditedUsername(e.target.value)}
                 />
               </label>
-
               <label className={styles.inputField}>
                 自己紹介:
                 <textarea
@@ -267,7 +268,6 @@ const MypageProfile = ({ params }: { params: Params }) => {
                   onChange={(e) => setEditedBio(e.target.value)}
                 />
               </label>
-
               <label className={styles.inputField}>
                 性別:
                 <select
@@ -279,7 +279,6 @@ const MypageProfile = ({ params }: { params: Params }) => {
                   <option value="その他">その他</option>
                 </select>
               </label>
-
               <label className={styles.inputField}>
                 リンク:
                 <input
@@ -288,7 +287,6 @@ const MypageProfile = ({ params }: { params: Params }) => {
                   onChange={(e) => setEditedLink(e.target.value)}
                 />
               </label>
-
               <div className={styles.buttonGroup}>
                 <button
                   className={styles.saveButton}
