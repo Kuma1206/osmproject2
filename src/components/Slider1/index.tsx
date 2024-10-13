@@ -110,7 +110,7 @@ const Slider1 = () => {
       <p className={styles.title1}></p>
       <Swiper
         direction="vertical"
-        spaceBetween={30}
+        spaceBetween={0}
         slidesPerView={1}
         loop={true} // ループを有効化
         className={styles.swiper}
