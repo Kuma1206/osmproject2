@@ -24,7 +24,7 @@ const Slider1 = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const videosCollectionRef = collection(db, "user_videos");
+        const videosCollectionRef = collection(db, "merged_videos");
         const videosQuery = query(
           videosCollectionRef,
           where("isPublic", "==", true),
@@ -46,7 +46,7 @@ const Slider1 = () => {
           const videoData = doc.data();
           console.log("Video document data:", videoData); // クエリ結果をログ出力
 
-          if (videoData.videoUrl) {
+          if (videoData.mergedVideoUrl) {
             // 短縮URLがあれば使用、なければ通常のURLを使う
             const videoLink =
               videoData.shortUrl ||
@@ -55,14 +55,14 @@ const Slider1 = () => {
               )}&videoDocId=${doc.id}`;
 
             allPublicVideos.push({
-              videoUrl: videoData.videoUrl,
+              videoUrl: videoData.mergedVideoUrl,
               shortUrl: videoLink, // 短縮URLまたは通常のURLを保存
               videoDocId: doc.id,
               thumbnailUrl: videoData.thumbnailUrl || "", // サムネイルURLも追加
             });
             console.log("Video URL added:", videoLink);
           } else {
-            console.log("No videoUrl found for document");
+            console.log("No mergedVideoUrl found for document");
           }
         });
 
@@ -129,7 +129,7 @@ const Slider1 = () => {
                     videoDocId: video.videoDocId,
                     thumbnailUrl: video.thumbnailUrl,
                     shortUrl: video.shortUrl,
-                    videoUrl: video.videoUrl, // videoUrlを渡す
+                    videoUrl: video.mergedVideoUrl, // videoUrlを渡す
                   },
                 }}
               >
@@ -140,7 +140,7 @@ const Slider1 = () => {
                       videoDocId: video.videoDocId,
                       thumbnailUrl: video.thumbnailUrl,
                       shortUrl: video.shortUrl,
-                      videoUrl: video.videoUrl,
+                      videoUrl: video.mergedVideoUrl,
                     });
                   }}
                 >
@@ -148,14 +148,15 @@ const Slider1 = () => {
                     ref={(el) => {
                       videoRefs.current[index] = el;
                     }}
-                    src={video.videoUrl}
+                    src={video.mergedVideoUrl}
                     width="100%"
                     height="10%"
                     autoPlay
+                    muted
                     controls={false}
                     loop={false}
                     onEnded={handleVideoEnded}
-                    poster={video.thumbnailUrl || video.videoUrl}
+                    poster={video.thumbnailUrl || video.mergedVideoUrl}
                   >
                     お使いのブラウザはvideoタグをサポートしていません。
                   </video>

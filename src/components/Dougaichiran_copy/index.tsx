@@ -23,7 +23,7 @@ const auth = getAuth(app);
 
 interface VideoData {
   id: string;
-  videoUrl: string;
+  mergedVideoUrl: string;
   audioUrl: string;
   userId: string;
   status: string;
@@ -38,18 +38,18 @@ const Dougaichiran = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchVideos = async (userId: string) => {
-    const videoCollectionRef = collection(firestore, "user_videos");
+    const videoCollectionRef = collection(firestore, "merged_videos");
     const q = query(videoCollectionRef, where("userId", "==", userId));
 
     // Firestoreのvideosコレクションからデータを取得
     const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
       const videoData = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() } as VideoData))
-        .filter((data) => data.videoUrl);
+        .filter((data) => data.mergedVideoUrl);
 
       setVideoList(videoData);
       setLoading(false);
-    });
+    }); 
 
     return unsubscribeSnapshot;
   };
@@ -110,7 +110,7 @@ const Dougaichiran = () => {
                 pathname: "/hozondougasaisei_copy",
                 query: {
                   userId: auth.currentUser?.uid, // ユーザーIDを追加
-                  videoUrl: video.videoUrl,
+                  videoUrl: video.mergedVideoUrl,
                   videoDocId: video.id, // videoDocIdをクエリパラメータとして追加
                   isPublic: video.isPublic, // isPublic プロパティを追加
                 },
@@ -123,7 +123,7 @@ const Dougaichiran = () => {
                   className={styles.backbutton}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleDelete(video.id, video.videoUrl);
+                    handleDelete(video.id, video.mergedVideoUrl);
                   }}
                 >
                   <WeuiClose2Outlined />
