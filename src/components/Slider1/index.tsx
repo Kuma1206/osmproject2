@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
-import styles from "./style.module.scss";
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
+import { Swiper, SwiperSlide } from "swiper/react";
 import Link from "next/link";
+import "swiper/swiper-bundle.css";
+import styles from "./style.module.scss";
 import { db } from "@/firebase/client"; // Firebaseの初期化設定をインポート
+
+// 配列をシャッフルする関数
+const shuffleArray = (array: any[]) => {
+  return array
+    .map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+};
 
 const Slider1 = () => {
   const [videos, setVideos] = useState<any[]>([]); // 動画データを格納するステート
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]); // 各動画のrefを保存
+  const swiperRef = useRef<any>(null); // Swiperのrefを保存
+  const [randomVideos, setRandomVideos] = useState<any[]>([]); // ランダムな順序で保存
 
   // Firestoreから動画リンクを取得
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        console.log("Fetching public videos...");
-
-        // FirestoreのvideosコレクションからisPublicがtrueのドキュメントを取得
-        const videosCollectionRef = collection(db, "videos");
-        // クエリに orderBy を追加
+        const videosCollectionRef = collection(db, "merged_videos");
         const videosQuery = query(
           videosCollectionRef,
           where("isPublic", "==", true),
@@ -39,7 +46,7 @@ const Slider1 = () => {
           const videoData = doc.data();
           console.log("Video document data:", videoData); // クエリ結果をログ出力
 
-          if (videoData.videoUrl) {
+          if (videoData.mergedVideoUrl) {
             // 短縮URLがあれば使用、なければ通常のURLを使う
             const videoLink =
               videoData.shortUrl ||
@@ -48,19 +55,20 @@ const Slider1 = () => {
               )}&videoDocId=${doc.id}`;
 
             allPublicVideos.push({
-              videoUrl: videoData.videoUrl,
+              videoUrl: videoData.mergedVideoUrl,
               shortUrl: videoLink, // 短縮URLまたは通常のURLを保存
               videoDocId: doc.id,
               thumbnailUrl: videoData.thumbnailUrl || "", // サムネイルURLも追加
             });
             console.log("Video URL added:", videoLink);
           } else {
-            console.log("No videoUrl found for document");
+            console.log("No mergedVideoUrl found for document");
           }
         });
 
-        // 公開動画データをステートに保存
+        // 公開動画データをステートに保存し、ランダム化
         setVideos(allPublicVideos);
+        setRandomVideos(shuffleArray(allPublicVideos)); // シャッフルした順番で動画をセット
         console.log(`Total public videos found: ${allPublicVideos.length}`);
       } catch (error) {
         console.error("Error fetching video data:", error);
@@ -70,41 +78,96 @@ const Slider1 = () => {
     fetchVideos();
   }, []);
 
-  const responsive = {
-    superLargeDesktop: { breakpoint: { max: 4000, min: 3000 }, items: 5 },
-    desktop: { breakpoint: { max: 3000, min: 1024 }, items: 3 },
-    tablet: { breakpoint: { max: 1024, min: 464 }, items: 2 },
-    mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
+  // 動画再生終了時に次のスライドに進む
+  const handleVideoEnded = () => {
+    if (swiperRef.current) {
+      swiperRef.current.slideNext(); // 次のスライドへ自動で移動
+    }
+  };
+
+  // スライドが変わるたびに動画を自動再生し、他の動画はミュート
+  const handleSlideChange = (swiper: any) => {
+    const currentSlideIndex = swiper.realIndex; // 実際のスライドインデックス
+
+    // すべての動画をミュート
+    videoRefs.current.forEach((videoRef, index) => {
+      if (videoRef) {
+        videoRef.pause(); // 一旦すべての動画を停止
+        videoRef.muted = true; // ミュートに設定
+      }
+    });
+
+    // 現在の動画だけを再生し、ミュートを解除
+    const currentVideoRef = videoRefs.current[currentSlideIndex];
+    if (currentVideoRef) {
+      currentVideoRef.muted = false; // ミュートを解除
+      currentVideoRef.play(); // 新しいスライドに移動したら動画を再生
+    }
   };
 
   return (
     <div className={styles.menubox}>
-      <p className={styles.title1}>動画一覧</p>
-      <Carousel responsive={responsive}>
-        {videos.length > 0 ? (
-          videos.map((video, index) => (
-            <div key={index} className={styles.itembox}>
-              <Link href={video.shortUrl}>
-                <div className={styles.item}>
+      <p className={styles.title1}></p>
+      <Swiper
+        direction="vertical"
+        spaceBetween={0}
+        slidesPerView={1}
+        loop={true} // ループを有効化
+        className={styles.swiper}
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper; // Swiperのインスタンスを保存
+        }}
+        onSlideChange={handleSlideChange} // スライド変更時の処理
+      >
+        {randomVideos.length > 0 ? (
+          randomVideos.map((video, index) => (
+            <SwiperSlide key={index} className={styles.itembox}>
+              <Link
+                href={{
+                  pathname: "/usersityougamen",
+                  query: {
+                    videoDocId: video.videoDocId,
+                    thumbnailUrl: video.thumbnailUrl,
+                    shortUrl: video.shortUrl,
+                    videoUrl: video.mergedVideoUrl, // videoUrlを渡す
+                  },
+                }}
+              >
+                <div
+                  className={styles.item}
+                  onClick={() => {
+                    console.log("Navigating to video:", {
+                      videoDocId: video.videoDocId,
+                      thumbnailUrl: video.thumbnailUrl,
+                      shortUrl: video.shortUrl,
+                      videoUrl: video.mergedVideoUrl,
+                    });
+                  }}
+                >
                   <video
-                    src={video.videoUrl}
+                    ref={(el) => {
+                      videoRefs.current[index] = el;
+                    }}
+                    src={video.mergedVideoUrl}
                     width="100%"
+                    height="10%"
                     autoPlay
                     muted
-                    loop
                     controls={false}
-                    poster={video.thumbnailUrl || video.videoUrl} // サムネイルまたは動画のURLを表示
+                    loop={false}
+                    onEnded={handleVideoEnded}
+                    poster={video.thumbnailUrl || video.mergedVideoUrl}
                   >
                     お使いのブラウザはvideoタグをサポートしていません。
                   </video>
                 </div>
               </Link>
-            </div>
+            </SwiperSlide>
           ))
         ) : (
-          <p>保存された動画がありません。</p>
+          <p></p>
         )}
-      </Carousel>
+      </Swiper>
     </div>
   );
 };

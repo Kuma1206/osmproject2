@@ -5,7 +5,7 @@ import { db } from "../../firebase/client";
 import Link from "next/link";
 
 const Odaiidhiran = () => {
-  const [videos, setVideos] = useState<any[]>([]); // サムネイルと動画URLのオブジェクト配列
+  const [videos, setVideos] = useState<any[]>([]); // サムネイル、動画URL、videoIdのオブジェクト配列
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "videos"), (snapshot) => {
@@ -13,6 +13,7 @@ const Odaiidhiran = () => {
         const data = doc.data();
         console.log("Firestore data:", data); // 取得したデータを確認
         return {
+          id: doc.id, // ドキュメントID（videoId）
           url: data.url, // 動画URL
           thumbnailUrl: data.thumbnailUrl || "", // サムネイルURL
         };
@@ -34,7 +35,7 @@ const Odaiidhiran = () => {
             <Link
               href={{
                 pathname: "/onsei_sakusei2_copy",
-                query: { videoUrl: video.url },
+                query: { videoUrl: video.url, videoId: video.id }, // videoIdをクエリとして渡す
               }}
               key={index}
               className={styles.movebox}

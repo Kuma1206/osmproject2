@@ -18,7 +18,7 @@ const firestore = getFirestore(app);
 
 const Onsei_sakusei2_copy = () => {
   const router = useRouter();
-  const { videoUrl } = router.query;
+  const { videoUrl, videoId } = router.query; // videoIdを取得
   const [isRecording, setIsRecording] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -55,7 +55,6 @@ const Onsei_sakusei2_copy = () => {
         setFfmpegLoaded(true);
         console.log("FFmpegが正常にロードされました");
       } catch (error) {
-        // さらに詳細なエラーログ
         console.error("FFmpegロードエラー:", error);
         if (error instanceof Error) {
           alert(
@@ -158,176 +157,42 @@ const Onsei_sakusei2_copy = () => {
     setIsRecording(false);
   };
 
-  const captureThumbnail = async () => {
-    if (!videoRef.current) {
-      alert("動画が見つかりません");
-      return null;
+  const saveAudioToFirebase = async (audioBlob: Blob) => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("ユーザーがログインしていません");
     }
 
-    const videoElement = videoRef.current;
-    return new Promise<string | null>((resolve, reject) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
+    if (!videoId) {
+      alert("動画IDがありません。動画を選択してください。");
+      return; // videoIdがない場合は保存処理を停止
+    }
 
-      const ctx = canvas.getContext("2d");
-
-      videoElement.currentTime = 1;
-
-      const handleSeeked = () => {
-        if (ctx) {
-          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-          const dataURL = canvas.toDataURL("image/png");
-          console.log("サムネイルキャプチャ成功");
-          resolve(dataURL);
-        } else {
-          alert("Canvasのコンテキストが取得できませんでした");
-          reject("Canvas context not available");
-        }
-        videoElement.removeEventListener("seeked", handleSeeked);
-      };
-
-      videoElement.addEventListener("seeked", handleSeeked);
-
-      videoElement.onerror = () => {
-        alert("サムネイルのキャプチャ中にエラーが発生しました");
-        reject("サムネイルキャプチャに失敗");
-      };
-    });
-  };
-
-  const uploadThumbnailToFirebase = async (thumbnailDataUrl: string) => {
-    const user = auth.currentUser;
-    if (!user) return null;
-
-    const thumbnailFileName = `thumbnail_${Date.now()}.png`;
-    const thumbnailStorageRef = ref(
+    const audioFileName = `audio_${Date.now()}.webm`;
+    const audioStorageRef = ref(
       storage,
-      `user_thumbnails/${user.uid}/${thumbnailFileName}`
+      `user_audio/${user.uid}/${audioFileName}`
     );
 
-    const response = await fetch(thumbnailDataUrl);
-    const blob = await response.blob();
-    const snapshot = await uploadBytes(thumbnailStorageRef, blob);
-    return getDownloadURL(snapshot.ref);
-  };
-
-  const mergeAudioVideo = async (audioBlob: Blob, videoUrl: string) => {
-    if (!ffmpegLoaded) {
-      alert("FFmpegがロードされていません");
-      return null;
-    }
-
-    console.log("FFmpegを使って音声と動画を結合中");
-
-    const audioFile = "audio.webm";
-    const videoFile = "video.mp4";
-    const outputFile = "output.mp4";
-
     try {
-      const videoResponse = await fetch(videoUrl);
-      const videoBlob = await videoResponse.blob();
+      // 音声ファイルをFirebase Storageにアップロード
+      const snapshot = await uploadBytes(audioStorageRef, audioBlob);
+      const audioDownloadUrl = await getDownloadURL(snapshot.ref);
 
-      console.log("動画ファイルをFFmpegに書き込み中");
-      await ffmpeg.writeFile(videoFile, await fetchFile(videoBlob));
+      console.log("音声が保存されました: ", audioDownloadUrl);
 
-      console.log("音声ファイルをFFmpegに書き込み中");
-      await ffmpeg.writeFile(audioFile, await fetchFile(audioBlob));
-
-      console.log("音声と動画を結合開始");
-      await ffmpeg.exec([
-        "-i",
-        videoFile,
-        "-i",
-        audioFile,
-        "-c:v",
-        "copy",
-        "-c:a",
-        "aac",
-        "-strict",
-        "experimental",
-        outputFile,
-      ]);
-
-      const data = await ffmpeg.readFile(outputFile);
-      const mergedBlob = new Blob([data], { type: "video/mp4" });
-
-      console.log("音声と動画の結合が完了しました");
-
-      return mergedBlob;
-    } catch (error) {
-      if (error instanceof Error) {
-        alert("音声と動画の結合に失敗しました: " + error.message);
-      } else {
-        alert("音声と動画の結合に失敗しました: 不明なエラーが発生しました");
-      }
-      return null;
-    }
-  };
-
-  const saveMergedVideoToFirebase = async (
-    mergedBlob: Blob,
-    thumbnailUrl: string
-  ) => {
-    try {
-      setIsSaving(true);
-
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error("ユーザーが認証されていません");
-      }
-
-      const mergedVideoFileName = `merged_video_${Date.now()}.mp4`;
-      const mergedVideoRef = ref(
-        storage,
-        `user_videos/${user.uid}/${mergedVideoFileName}`
-      );
-
-      const snapshot = await uploadBytes(mergedVideoRef, mergedBlob);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      // 元の`videos`コレクションへの保存
-      const videoCollectionRef = doc(firestore, "videos", mergedVideoFileName);
-      await setDoc(videoCollectionRef, {
+      // Firestoreに音声のURLと結合する動画のIDを保存
+      await setDoc(doc(firestore, "user_audio", audioFileName), {
         userId: user.uid,
-        videoUrl: downloadURL,
-        thumbnailUrl: thumbnailUrl,
-        isPublic: true,
+        audioUrl: audioDownloadUrl,
+        videoId: videoId, // 結合する動画のIDを保存
         createdAt: Date.now(),
-        status: "ready",
       });
 
-      // 短縮URL用のランダムなIDを生成
-      const shortId = nanoid(6);
-
-      // 短縮URLを生成
-      const shortUrl = `https://osmproject.vercel.app/v/${shortId}`;
-
-      // 短縮URLも一緒にFirestoreの`videos`コレクションに保存
-      await setDoc(
-        videoCollectionRef,
-        {
-          shortUrl: shortUrl,
-          userId: user.uid,
-          videoUrl: downloadURL,
-          thumbnailUrl: thumbnailUrl,
-          isPublic: true,
-          createdAt: Date.now(),
-          status: "ready",
-        },
-        { merge: true }
-      );
-
-      console.log("短縮された動画URL:", shortUrl);
-
-      // 保存完了後、自動的に `seisaku_page2` へ遷移
-      alert(`動画が保存されました!`);
-      router.push("/seisaku_page2"); // ← 保存が成功したらページを遷移
-    } catch (err) {
-      console.error("動画の保存中にエラーが発生しました:", err);
-      alert("エラーが発生しました。もう一度やり直してください。");
-    } finally {
-      setIsSaving(false);
+      return audioDownloadUrl;
+    } catch (error) {
+      console.error("音声の保存中にエラーが発生しました: ", error);
+      throw error;
     }
   };
 
@@ -337,33 +202,14 @@ const Onsei_sakusei2_copy = () => {
       return;
     }
 
-    // 保存プロセスの開始時点で「保存中...」を表示するためにisSavingをtrueに設定
     setIsSaving(true);
-
-    console.log("サムネイルをキャプチャ開始");
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
     try {
-      const thumbnailDataUrl = await captureThumbnail(); // サムネイルのキャプチャ
-      console.log("サムネイルをキャプチャ完了");
-
-      const thumbnailUrl = await uploadThumbnailToFirebase(
-        thumbnailDataUrl || ""
-      );
-      console.log("サムネイルのFirebaseアップロード完了");
-
-      console.log("音声と動画の結合開始");
-      const mergedBlob = await mergeAudioVideo(audioBlob, videoUrl as string); // 音声と動画の結合
-      console.log("音声と動画の結合完了");
-
-      if (mergedBlob !== null && thumbnailUrl !== null) {
-        console.log("結合された動画をFirebaseに保存開始");
-        await saveMergedVideoToFirebase(mergedBlob, thumbnailUrl); // Firebaseへの保存
-        console.log("結合された動画をFirebaseに保存完了");
-      } else {
-        alert("動画の結合またはサムネイルの取得に失敗しました。");
-      }
+      // 音声をFirebaseに保存
+      const audioUrl = await saveAudioToFirebase(audioBlob);
+      alert("音声が保存されました!");
     } catch (err) {
       if (err instanceof Error) {
         alert("エラーが発生しました: " + err.message);
@@ -371,10 +217,11 @@ const Onsei_sakusei2_copy = () => {
         alert("不明なエラーが発生しました");
       }
     } finally {
-      setIsSaving(false); // 全ての処理が完了した後、再びisSavingをfalseに設定
+      setIsSaving(false);
     }
   };
 
+  // 音声と動画を同時に再生する
   const playAudioWithVideo = () => {
     if (audioRef.current && videoRef.current) {
       audioRef.current.play();
@@ -382,37 +229,13 @@ const Onsei_sakusei2_copy = () => {
     }
   };
 
-  const checkMicrophonePermission = async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("お使いのブラウザはマイクへのアクセスをサポートしていません。");
-      return null;
-    }
-
+  const checkMicrophonePermission = async (): Promise<MediaStream | null> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log("マイクのアクセスが許可されました");
       return stream;
     } catch (err) {
-      if (err instanceof Error) {
-        alert(
-          "マイクのアクセスが拒否されました、またはエラーが発生しました: " +
-            err.message
-        );
-      } else {
-        alert(
-          "マイクのアクセスが拒否されました、または未知のエラーが発生しました。"
-        );
-      }
+      console.error("マイクのアクセス許可が拒否されました:", err);
       return null;
-    }
-  };
-
-  const startRecordingWithPermissionCheck = async () => {
-    const stream = await checkMicrophonePermission();
-    if (stream) {
-      startRecording(stream);
-    } else {
-      alert("マイクの権限が許可されていません。録音を開始できません。");
     }
   };
 
@@ -470,6 +293,7 @@ const Onsei_sakusei2_copy = () => {
           </button>
         </div>
       </div>
+
       <div
         className={styles.hozonbox}
         onClick={saveAudio}

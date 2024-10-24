@@ -9,10 +9,15 @@ import { useRouter } from "next/router";
 import styles from "./style.module.scss"; // SCSSスタイルをインポート
 
 const links = [
+    {
+    label: "β機能",
+    path: "https://navygoat27.sakura.ne.jp/video-streaming-site/", // 外部リンク
+    external: true, // 外部リンクの場合はフラグを立てる
+  },
   {
     label: "マイページ",
     icon: <UserIcon />,
-    path: "/mypage",
+    path: "/mypage_profile",
   },
   {
     label: "設定",

@@ -38,7 +38,7 @@
   right: 5px; /* movebox の右からの距離 */
   width: 20px; /* 必要に応じてサイズを調整 */
   height: 30px; /* 必要に応じてサイズを調整 */
-  z-index: 1001; /* movebox内で最前面に表示 */
+  z-index: 999; /* movebox内で最前面に表示 */
   background-color: none; /* 背景色はそのまま */
   color: #fff;
   font-size: 20px;
