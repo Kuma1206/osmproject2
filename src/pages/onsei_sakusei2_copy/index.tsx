@@ -203,13 +203,15 @@ const Onsei_sakusei2_copy = () => {
     }
 
     setIsSaving(true);
-
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
 
     try {
       // 音声をFirebaseに保存
       const audioUrl = await saveAudioToFirebase(audioBlob);
       alert("音声が保存されました!");
+
+      console.log(router);
+      router.push("/seisaku_page2");
     } catch (err) {
       if (err instanceof Error) {
         alert("エラーが発生しました: " + err.message);

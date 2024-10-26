@@ -6,18 +6,18 @@ import Link from "next/link";
 
 const Usersityougamen = () => {
   const router = useRouter();
-  const { videoUrl, thumbnailUrl, shortUrl } = router.query; // クエリパラメータから取得
+  const { mergedVideoUrl, thumbnailUrl, shortUrl } = router.query; // クエリパラメータから取得
   const videoRef = useRef<HTMLVideoElement>(null); // video要素を参照
 
   useEffect(() => {
-    console.log("Received videoUrl:", videoUrl); // videoUrl をログに出力
+    console.log("Received videoUrl:", mergedVideoUrl); // videoUrl をログに出力
     console.log("Received shortUrl:", shortUrl); // shortUrl をログに出力
-  }, [videoUrl, shortUrl]);
+  }, [mergedVideoUrl, shortUrl]);
 
   return (
     <>
       <div className={styles.moviebox}>
-        {videoUrl ? (
+        {mergedVideoUrl ? (
           <>
             <video
               ref={videoRef}
@@ -28,7 +28,7 @@ const Usersityougamen = () => {
               muted={false}
               poster={thumbnailUrl ? (thumbnailUrl as string) : ""} // クエリパラメータから取得したサムネイルを表示
             >
-              <source src={videoUrl as string} type="video/mp4" />
+              <source src={mergedVideoUrl as string} type="video/mp4" />
               お使いのブラウザは動画タグをサポートしていません。
             </video>
           </>

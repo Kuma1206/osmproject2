@@ -6,8 +6,10 @@ import {
   where,
   onSnapshot,
   doc,
+  getDoc,
   updateDoc,
   deleteField,
+  getDocs,
   deleteDoc,
   Unsubscribe,
 } from "firebase/firestore";
@@ -49,7 +51,7 @@ const Dougaichiran = () => {
 
       setVideoList(videoData);
       setLoading(false);
-    }); 
+    });
 
     return unsubscribeSnapshot;
   };
@@ -75,17 +77,48 @@ const Dougaichiran = () => {
   const handleDelete = async (videoId: string, videoUrl: string) => {
     if (window.confirm("削除しますか？")) {
       try {
-        const videoDocRef = doc(firestore, "user_videos", videoId);
-        const storage = getStorage(app);
-        const videoRef = ref(storage, videoUrl); // videoUrl を使って Firebase Storage の参照を取得
+        const user = auth.currentUser;
+        if (!user) {
+          console.error("ログインが必要です。");
+          return;
+        }
 
-        // Firestore のドキュメントを削除
+        // 1. Firestore の merged_videos コレクション内の該当ドキュメントを削除
+        const videoDocRef = doc(firestore, "merged_videos", videoId);
+        const videoDoc = await getDoc(videoDocRef);
         await deleteDoc(videoDocRef);
 
-        // Firebase Storage から MP4 データを削除
+        // 2. Firestore の user_audio コレクション内の該当ドキュメントを削除
+        const audioQuery = query(
+          collection(firestore, "user_audio"),
+          where("videoId", "==", videoId)
+        );
+
+        const audioSnapshot = await getDocs(audioQuery);
+        audioSnapshot.forEach(async (audioDoc) => {
+          await deleteDoc(doc(firestore, "user_audio", audioDoc.id));
+        });
+
+        // 3. Firebase Storage の merged_videos フォルダ内の該当動画データを削除
+        const storage = getStorage(app);
+        const videoRef = ref(storage, videoUrl); // videoUrl を使って Firebase Storage の参照を取得
         await deleteObject(videoRef);
 
-        console.log("動画とFirebase Storageのデータが削除されました。");
+        // 4. Firebase Storage の user_audio フォルダ内の該当音声データを削除
+        audioSnapshot.forEach(async (audioDoc) => {
+          const audioData = audioDoc.data();
+          const audioStorageRef = ref(storage, audioData.audioUrl);
+          await deleteObject(audioStorageRef);
+        });
+
+        // 4. thumbnails フォルダからサムネイルを削除
+        const thumbnailUrl = videoDoc.data()?.thumbnailUrl;
+        if (thumbnailUrl) {
+          const thumbnailRef = ref(storage, thumbnailUrl);
+          await deleteObject(thumbnailRef);
+        }
+
+        console.log("動画と関連する音声データが削除されました。");
       } catch (error) {
         console.error("エラーが発生しました。:", error);
       }

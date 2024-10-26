@@ -51,18 +51,18 @@ const Slider1 = () => {
             const videoLink =
               videoData.shortUrl ||
               `/usersityougamen?videoUrl=${encodeURIComponent(
-                videoData.videoUrl
+                videoData.mergedVideoUrl
               )}&videoDocId=${doc.id}`;
 
             allPublicVideos.push({
-              videoUrl: videoData.mergedVideoUrl,
+              mergedVideoUrl: videoData.mergedVideoUrl,
               shortUrl: videoLink, // 短縮URLまたは通常のURLを保存
               videoDocId: doc.id,
               thumbnailUrl: videoData.thumbnailUrl || "", // サムネイルURLも追加
             });
             console.log("Video URL added:", videoLink);
           } else {
-            console.log("No mergedVideoUrl found for document");
+            console.log("No videoUrl found for document");
           }
         });
 
@@ -129,7 +129,7 @@ const Slider1 = () => {
                     videoDocId: video.videoDocId,
                     thumbnailUrl: video.thumbnailUrl,
                     shortUrl: video.shortUrl,
-                    videoUrl: video.mergedVideoUrl, // videoUrlを渡す
+                    mergedVideoUrl: video.mergedVideoUrl, // videoUrlを渡す
                   },
                 }}
               >
@@ -140,7 +140,7 @@ const Slider1 = () => {
                       videoDocId: video.videoDocId,
                       thumbnailUrl: video.thumbnailUrl,
                       shortUrl: video.shortUrl,
-                      videoUrl: video.mergedVideoUrl,
+                      mergedVideoUrl: video.mergedVideoUrl,
                     });
                   }}
                 >
@@ -152,7 +152,6 @@ const Slider1 = () => {
                     width="100%"
                     height="10%"
                     autoPlay
-                    muted
                     controls={false}
                     loop={false}
                     onEnded={handleVideoEnded}

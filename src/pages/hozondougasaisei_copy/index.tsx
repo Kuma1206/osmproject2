@@ -5,7 +5,16 @@ import WeuiClose2Outlined from "@/components/Backbutton";
 import Link from "next/link";
 import "react-toggle/style.css";
 import Toggle from "react-toggle";
-import { doc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  getDoc,
+  deleteDoc,
+  query,
+  where,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 import { db, storage } from "@/firebase/client";
 import { deleteObject, ref } from "firebase/storage";
 
@@ -97,15 +106,39 @@ const Hozondougasaisei_copy = () => {
 
     if (confirmation && userId && videoDocId && videoUrl) {
       try {
+        // 1. Delete the `merged_videos` document
+        const videoDocRef = doc(db, "merged_videos", videoDocId as string);
+        const videoDoc = await getDoc(videoDocRef);
+        await deleteDoc(videoDocRef);
+
+        // 2. Delete associated audio document(s) in `user_audio`
+        const audioQuery = query(
+          collection(db, "user_audio"),
+          where("videoId", "==", videoDocId)
+        );
+        const audioSnapshot = await getDocs(audioQuery);
+        for (const audioDoc of audioSnapshot.docs) {
+          await deleteDoc(doc(db, "user_audio", audioDoc.id));
+
+          // 4. Delete associated audio file from Storage
+          const audioData = audioDoc.data();
+          const audioRef = ref(storage, audioData.audioUrl);
+          await deleteObject(audioRef);
+        }
+
+        // 3. Delete video file in `merged_videos` folder
         const videoRefInStorage = ref(storage, videoUrl as string);
         await deleteObject(videoRefInStorage);
 
-        const videoDocRef = doc(db, "merged_videos", videoDocId as string);
-        await deleteDoc(videoDocRef);
+        // 4. thumbnails フォルダからサムネイルを削除
+        const thumbnailUrl = videoDoc.data()?.thumbnailUrl;
+        if (thumbnailUrl) {
+          const thumbnailRef = ref(storage, thumbnailUrl);
+          await deleteObject(thumbnailRef);
+        }
 
-        console.log("動画データが正常に削除されました。");
+        console.log("動画と関連する音声データが削除されました。");
         alert("削除しました");
-
         router.push("/seisaku_page2");
       } catch (error) {
         console.error("動画データの削除中にエラーが発生しました:", error);
