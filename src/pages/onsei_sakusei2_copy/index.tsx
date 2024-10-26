@@ -229,13 +229,37 @@ const Onsei_sakusei2_copy = () => {
     }
   };
 
-  const checkMicrophonePermission = async (): Promise<MediaStream | null> => {
+  const checkMicrophonePermission = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("お使いのブラウザはマイクへのアクセスをサポートしていません。");
+      return null;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("マイクのアクセスが許可されました");
       return stream;
     } catch (err) {
-      console.error("マイクのアクセス許可が拒否されました:", err);
+      if (err instanceof Error) {
+        alert(
+          "マイクのアクセスが拒否されました、またはエラーが発生しました: " +
+            err.message
+        );
+      } else {
+        alert(
+          "マイクのアクセスが拒否されました、または未知のエラーが発生しました。"
+        );
+      }
       return null;
+    }
+  };
+
+  // 権限チェックを含む録音開始処理
+  const startRecordingWithPermissionCheck = async () => {
+    const stream = await checkMicrophonePermission();
+    if (stream) {
+      startRecording(stream);
+    } else {
+      alert("マイクの権限が許可されていません。録音を開始できません。");
     }
   };
 
