@@ -158,7 +158,6 @@ const Hozondougasaisei_copy = () => {
             <video
               ref={videoRef}
               width="100%"
-              muted
               autoPlay
               playsInline
               controls
