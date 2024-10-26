@@ -157,9 +157,11 @@ const Hozondougasaisei_copy = () => {
           <>
             <video
               ref={videoRef}
-              controls
               width="100%"
               muted
+              autoPlay
+              playsInline
+              controls
               controlsList="nodownload"
               onPlay={handlePlay}
               onPause={handlePause}
