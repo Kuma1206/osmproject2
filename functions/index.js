@@ -82,9 +82,14 @@ exports.mergeAudioWithVideo = functions.firestore
           .setFfmpegPath(ffmpegStatic)
           .input(videoFilePath)
           .input(audioFilePath)
-          .outputOptions("-c:v", "copy")
-          .outputOptions("-c:a", "aac")
+          .outputOptions("-c:v", "libx264") // エンコーダを明示的に指定
+          .outputOptions("-b:v", "2000k") // 動画ビットレート
+          .outputOptions("-c:a", "aac") // オーディオエンコーダ
+          .outputOptions("-b:a", "128k") // 音声ビットレート
           .output(outputFilePath)
+          .on("start", (commandLine) => {
+            console.log("FFmpeg command: ", commandLine); // コマンドをログに出力
+          })
           .on("end", async () => {
             console.log("音声と動画の結合が完了しました。");
 
