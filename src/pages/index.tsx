@@ -18,7 +18,7 @@ export default function Home() {
       </Head>
       <Header />
       <main className={styles.mainbox}>
-        <HeaderImage />
+        {/* <HeaderImage /> */}
         <Slider1 />
       </main>
     </>
