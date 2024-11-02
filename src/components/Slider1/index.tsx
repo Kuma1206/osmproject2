@@ -124,7 +124,7 @@ const Slider1 = () => {
             <SwiperSlide key={index} className={styles.itembox}>
               <Link
                 href={{
-                  pathname: "/usersityougamen",
+                  // pathname: "/usersityougamen",
                   query: {
                     videoDocId: video.videoDocId,
                     thumbnailUrl: video.thumbnailUrl,

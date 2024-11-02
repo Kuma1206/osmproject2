@@ -12,19 +12,43 @@
 .tabbox {
   display: flex;
   justify-content: center;
+  align-items: center;
   width: 90%;
-  height: 30px;
+  height: 23px;
   border-radius: 5px;
-  background-color: #000;
+  background-color: #fff;
   color: #fff;
+  overflow-x: auto; /* 横スクロールを有効にする */
+  overflow-y: hidden; 
+  white-space: nowrap; /* タブが折り返されないようにする */
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .menubox {
-  width: 100%;
-  height: 30px;
+  height: 23px;
+  margin-left: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 50px;
+  border: 1px solid black; /* ボーダーの色、スタイル、幅をまとめて指定 */
+  color: #000;
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0; /* 横スクロールで縮小されないようにする */
+}
+
+.menubox:first-of-type {
+  margin-left: 100px; /* 一番左のタブにのみ余白を追加 */
+}
+
+.selectedTab {
+  background-color: #333;
+  color: white;
+  border-color: #333;
 }
 
 .mainbox {

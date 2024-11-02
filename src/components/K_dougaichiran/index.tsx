@@ -19,9 +19,9 @@ import styles from "./style.module.scss";
 import WeuiClose2Outlined from "@/components/Backbutton";
 
 const K_dougaichiran: React.FC = () => {
-  const [videos, setVideos] = useState<any[]>([]); // 動画URLとサムネイルのステート
+  const [videos, setVideos] = useState<any[]>([]); // 動画URLのステート
   const [userId, setUserId] = useState<string | null>(null); // ユーザーIDのステート
-  const videoRef = useRef<HTMLVideoElement | null>(null); // 動画要素の参照
+  const hiddenVideoRef = useRef<HTMLVideoElement | null>(null); // サムネイル生成用の非表示動画要素
 
   // ユーザー認証の監視
   useEffect(() => {
@@ -40,10 +40,10 @@ const K_dougaichiran: React.FC = () => {
   const captureThumbnail = (
     captureTimeInSeconds: number = 1
   ): Promise<string | null> => {
-    if (!videoRef.current) return Promise.resolve(null);
+    if (!hiddenVideoRef.current) return Promise.resolve(null);
 
     return new Promise<string | null>((resolve, reject) => {
-      const videoElement = videoRef.current;
+      const videoElement = hiddenVideoRef.current;
 
       const handleTimeUpdate = () => {
         try {
@@ -113,38 +113,37 @@ const K_dougaichiran: React.FC = () => {
           const downloadURL = await getDownloadURL(snapshot.ref);
           console.log("ダウンロードURL: ", downloadURL);
 
-          // 動画を設定してサムネイルキャプチャ
-          if (videoRef.current) {
-            videoRef.current.src = downloadURL;
+          // hiddenVideoRef に動画を設定し、サムネイルをキャプチャ
+          if (hiddenVideoRef.current) {
+            hiddenVideoRef.current.src = downloadURL;
 
-            videoRef.current.onloadeddata = async () => {
-              // 動画を自動で再生
-              videoRef.current!.play();
+            hiddenVideoRef.current.onloadeddata = async () => {
+              // 動画を再生し、1秒後にサムネイルをキャプチャ
+              hiddenVideoRef.current!.play();
 
-              // 1秒後に動画を停止してサムネイルをキャプチャ
               setTimeout(async () => {
-                videoRef.current!.pause(); // 1秒後に動画を停止
-                const thumbnailDataUrl = await captureThumbnail(1); // サムネイルをキャプチャ
+                hiddenVideoRef.current!.pause();
+                const thumbnailDataUrl = await captureThumbnail(1);
 
                 let thumbnailUrl = null;
                 if (thumbnailDataUrl) {
                   thumbnailUrl = await uploadThumbnailToFirebase(
                     thumbnailDataUrl
-                  ); // サムネイルをFirebaseにアップロード
+                  );
                 }
 
                 // Firestore に動画の URL と uploaderId、サムネイルURLを保存
                 const docRef = await addDoc(collection(db, "videos"), {
                   url: downloadURL,
-                  uploaderId: userId, // 認証されたユーザーのIDを保存
-                  thumbnailUrl, // サムネイルURL
-                  createdAt: new Date(), // 作成日時を保存
+                  uploaderId: userId,
+                  thumbnailUrl,
+                  createdAt: new Date(),
                 });
 
                 setVideos((prevVideos) => [
                   ...prevVideos,
-                  { id: docRef.id, url: downloadURL, thumbnailUrl },
-                ]); // 新しい動画URLをステートに追加
+                  { id: docRef.id, url: downloadURL },
+                ]);
               }, 1000); // 1秒後にサムネイルをキャプチャ
             };
           }
@@ -161,7 +160,6 @@ const K_dougaichiran: React.FC = () => {
     const fetchVideos = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "videos"));
-        // Firestoreから動画URLとサムネイルURLを取得してステートに保存
         const videoData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -179,7 +177,7 @@ const K_dougaichiran: React.FC = () => {
   const handleDelete = async (
     videoId: string,
     videoUrl: string,
-    thumbnailUrl: string
+    thumbnailUrl: string | null
   ) => {
     if (window.confirm("削除しますか？")) {
       try {
@@ -204,12 +202,13 @@ const K_dougaichiran: React.FC = () => {
           });
         }
 
-        // 画面から動画を削除
+        // 画面から動画を即座に削除
         setVideos((prevVideos) =>
           prevVideos.filter((video) => video.id !== videoId)
         );
 
         console.log("動画とサムネイルが削除されました");
+        alert("削除しました"); // アラートを表示
       } catch (error) {
         console.error("削除に失敗しました: ", error);
       }
@@ -218,13 +217,20 @@ const K_dougaichiran: React.FC = () => {
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
-      "video/*": [], // 動画ファイルのみを許可
+      "video/*": [],
     },
     onDrop,
   });
 
   return (
     <div className={styles.mainbox}>
+      {/* サムネイル生成用の非表示動画要素 */}
+      <video
+        ref={hiddenVideoRef}
+        style={{ display: "none" }}
+        crossOrigin="anonymous"
+      ></video>
+
       {/* 動画アップロード用のボックス */}
       <div {...getRootProps({ className: styles.movebox })}>
         <input {...getInputProps()} />
@@ -242,7 +248,7 @@ const K_dougaichiran: React.FC = () => {
           >
             <WeuiClose2Outlined />
           </div>
-          <video ref={videoRef} controls width="100%" crossOrigin="anonymous">
+          <video controls width="100%" crossOrigin="anonymous">
             <source src={video.url} type="video/mp4" />
             お使いのブラウザはvideoタグをサポートしていません。
           </video>

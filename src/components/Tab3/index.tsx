@@ -12,9 +12,18 @@ const Tab3 = () => {
       <Tabs>
         <div className={styles.tabstyle}>
           <TabList className={styles.tabbox}>
-            <Tab className={styles.menubox}>My library</Tab>
-            <Tab className={styles.menubox}>New</Tab>
-            <Tab className={styles.menubox}>keep</Tab>
+            <Tab
+              className={styles.menubox}
+              selectedClassName={styles.selectedTab}
+            >
+              My library
+            </Tab>
+            <Tab
+              className={styles.menubox}
+              selectedClassName={styles.selectedTab}
+            >
+              New
+            </Tab>
           </TabList>
         </div>
 
@@ -28,11 +37,11 @@ const Tab3 = () => {
             <Shinki />
           </div>
         </TabPanel>
-        <TabPanel>
+        {/* <TabPanel>
           <div>
             <Ichijihozon />
           </div>{" "}
-        </TabPanel>
+        </TabPanel> */}
       </Tabs>
     </div>
   );

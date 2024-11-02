@@ -13,9 +13,42 @@ const Shinki = () => {
         <Tabs>
           <div className={styles.submenubox}>
             <TabList className={styles.tabbox}>
-              <Tab className={styles.menubox}>テーマ</Tab>
-              <Tab className={styles.menubox}>シナリオ</Tab>
-              <Tab className={styles.menubox}>アフレコ</Tab>
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                恋愛
+              </Tab>
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                SF  
+              </Tab>
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                スポーツ
+              </Tab>
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                戦争
+              </Tab>
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                ホラー
+              </Tab>{" "}
+              <Tab
+                className={styles.menubox}
+                selectedClassName={styles.selectedTab}
+              >
+                アクション
+              </Tab>
             </TabList>
           </div>
 
