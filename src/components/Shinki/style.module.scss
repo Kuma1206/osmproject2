@@ -21,7 +21,7 @@
   overflow-x: auto; /* 横スクロールを有効にする */
   overflow-y: hidden; 
   white-space: nowrap; /* タブが折り返されないようにする */
-  scrollbar-width: thin;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
 

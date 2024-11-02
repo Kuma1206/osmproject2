@@ -29,7 +29,7 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 <IoMdHome
                   className={styles.iconhome}
-                  color={isHomePage ? "#000" : "#ccc"} // アクティブなら黒、非アクティブならグレー
+                  color={isHomePage ? "#fff" : "#dfdcdc"} // アクティブなら黒、非アクティブならグレー
                 />
               </Tab>
               <Tab

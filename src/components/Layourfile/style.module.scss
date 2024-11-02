@@ -1,6 +1,6 @@
 .mainbox {
   margin-top: 0px; /* headerの下に少しだけスペースを追加 */
-  background-color: none;
+  background-color: transparent;
   width: 100%;
   min-height: calc(100vh - 60px); /* 画面全体の高さからtabmenuの高さを引く */
   padding-bottom: 40px; /* tabmenuと重ならないようにパディングを追加 */
@@ -15,7 +15,7 @@
   bottom: 5px;
   left: 0;
   width: 100%;
-  background-color: none;
+  background-color: transparent;
   height: 40px;
   z-index: 1000; /* コンテンツより上に表示するための設定 */
   margin: 0; /* 追加のマージンを削除 */
@@ -24,24 +24,25 @@
 
 .homeMain {
   width: 100%;
-  height: 50px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
+  background-color: transparent;
   color: #000;
   border: none;
 }
 
 .homeMain:focus {
   outline: none; /* 青いフォーカスの線を消す */
+  background-color: transparent;
 }
 
 .tabbox {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background-color: #fff;
+  background-color: transparent;
   position: relative;
 }
 
@@ -51,7 +52,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
+  background-color: transparent;
   color: #000;
   border-bottom: 2px solid rgb(235, 235, 235);
 }
@@ -64,7 +65,7 @@
 .icon {
   width: 24px;
   height: 24px;
-  stroke: #a1a1a1; /* 非アクティブなアイコンの枠線 */
+  stroke: #dfdcdc; /* 非アクティブなアイコンの枠線 */
   fill: none; /* 非アクティブなアイコンの中身を透明に */
 }
 
@@ -91,9 +92,9 @@
   align-items: center;
   width: 24px;
   height: 24px;
-  color: #000; /* クリック後のアイコン色 */
-  fill: #000; /* クリック後の内側の色を白に */
-  stroke: #000; /* 外側の線の色 */
+  color: #fff; /* クリック後のアイコン色 */
+  fill: #fff; /* クリック後の内側の色を白に */
+  stroke: #fff; /* 外側の線の色 */
   stroke-width: 1px; /* 線の太さ */
 }
 
@@ -127,6 +128,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: transparent;
   position: relative;
   margin: 0;
   padding: 0;
@@ -141,4 +143,21 @@
   bottom: 60px; /* tabmenuの上に配置 */
   color: #fff; /* テキストを見やすくするための色 */
   padding: 10px;
+}
+
+
+/* 選択されたタブのスタイル */
+.react-tabs__tab--selected {
+  background-color: transparent; /* 選択時の背景色 */
+  color: #fff; /* 選択時の文字色 */
+  border-bottom: 2px solid #000; /* 選択時のボーダー */
+}
+
+.menubox, .homeMain, .react-tabs__tab--selected {
+  outline: none; /* フォーカス時の青いアウトラインを削除 */
+  background-color: transparent !important; /* 背景を常に透明に設定 */
+}
+
+.menubox:active, .homeMain:active, .react-tabs__tab--selected:active {
+  background-color: transparent !important; /* クリック時の背景色も透明に設定 */
 }
